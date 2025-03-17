@@ -2,6 +2,7 @@ package controller
 
 import (
 	service "github.com/dinhdev-nu/realtime_auth_go/internal/service/auth"
+	res "github.com/dinhdev-nu/realtime_auth_go/pkg/response"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,5 +17,6 @@ func NewAuthController(authService *service.AuthService) *AuthController {
 }
 	
 func (ac *AuthController) Ping(ctx *gin.Context) {
-	ctx.JSON(200, ac.AuthService.Ping())
+	res.SuccessResponse(ctx, ac.AuthService.Ping())
+	// res.BadRequestError(ctx, 4001, "Error")
 }

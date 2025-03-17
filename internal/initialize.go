@@ -7,8 +7,12 @@ import (
 
 func Run() *gin.Engine {
 
-	r:= *router.InitRouter()
+	r:= gin.Default()
 
-	
-	return &r
+	// Init middlewares
+	// r.Use(middlewares.ErrorMiddleware())
+
+	return router.InitRouter(r)
+
+
 }

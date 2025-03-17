@@ -35,3 +35,7 @@ or
 **Wire**
 -- clean up dependencies from params to the function to use
 <code></code>
+
+
+-- Handle error, response ...
+-- 

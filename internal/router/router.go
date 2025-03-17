@@ -27,12 +27,11 @@ func (rm *RouterMain) InitRoutes(api *gin.RouterGroup) {
 	}
 }
 
-func InitRouter() *gin.Engine {
-	r := gin.Default() // init gin with default log middleware
+func InitRouter(r *gin.Engine) *gin.Engine {
 
 	apiRoutes := r.Group("/v1/api")
 	mainRouter := NewRouterMain()
 	mainRouter.InitRoutes(apiRoutes)
-	
+
 	return r
 }
