@@ -19,6 +19,10 @@ func BadRequestError(ctx *gin.Context, code int, mes string){ // 400
 	JSON(ctx, http.StatusBadRequest, code, mes, nil)
 }
 
+func UnauthorizedError(ctx *gin.Context, code int, mes string){ // 401
+	JSON(ctx, http.StatusUnauthorized, InvalidToken, CodeMessage[InvalidToken], nil)
+}
+
 func ServerError(ctx *gin.Context){ // 500
 	JSON(ctx, http.StatusInternalServerError, ServerErrorCode, CodeMessage[ServerErrorCode], nil)
 }

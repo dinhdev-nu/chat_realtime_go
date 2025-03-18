@@ -39,3 +39,13 @@ or
 
 -- Handle error, response ...
 -- 
+
+**Logger**
+-- Zap 
+<code>go get -u go.uber.org/zap</code>
+-- Segment Log file
+<code>go get -u github.com/natefinch/lumberjack</code>
+
+**Environment**
+--viper
+<code>go get github.com/spf13/viper</code>
