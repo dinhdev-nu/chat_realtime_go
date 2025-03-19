@@ -14,12 +14,15 @@ func Run() {
 
 	// Config 
 	c.LoadConfig(); // fmt.Print(global.Config.Server.Port)
+	c.InitLogger() // g.Log.Info("Server is starting...")
+	c.InitMysql()
 
 	r:= gin.Default() // Init gin router
 
-	// Init middlewares
+	// Middlewares
 	// r.Use(middlewares.ErrorMiddleware())
 	r.Use(middlewares.Cors())
+	// r.Use(middlewares.Logger())
 
 
 	server:= router.InitRouter(r)

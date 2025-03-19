@@ -21,3 +21,14 @@ func LoadConfig() {
 		panic("Error unmarshal config" + err.Error())
 	}
 }
+
+// get env 
+// func loadEnv() {
+// 	err:= dotenv.Load() // go get github.com/joho/godotenv
+// 	if err!= nil {
+// 		panic("Error loading env file" + err.Error())
+// 	}
+
+// 	global.Config.Server.Host = os.Getenv("HOST")
+// 	global.Config.Server.Port = os.Getenv("PORT")
+// }

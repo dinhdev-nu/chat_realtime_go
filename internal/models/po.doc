@@ -1,0 +1,3 @@
+PO Persistent Object (Đối tượng biểu diễn)
+-- là đối tượng struct(go) biểu điễn các field trong db
+1 po == 1 table

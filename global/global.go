@@ -1,29 +1,13 @@
 package global
 
-import "github.com/dinhdev-nu/realtime_auth_go/pkg/logger"
-
-var (
-	Config Confg
-	Log    *logger.LoggerZap
+import (
+	"github.com/dinhdev-nu/realtime_auth_go/pkg/logger"
+	"github.com/dinhdev-nu/realtime_auth_go/setting"
+	"gorm.io/gorm"
 )
 
-type Confg struct {
-	Server Server `mapstructure:"server"`
-	MySql  MySql  `mapstructure:"mysql"`
-}
-
-type Server struct {
-	Host string `mapstructure:"host"`
-	Port string `mapstructure:"port"`
-}
-
-type MySql struct {
-	Host         string `mapstructure:"host"`
-	Port         string `mapstructure:"port"`
-	Dbname       string `mapstructure:"dbname"`
-	Username     string `mapstructure:"username"`
-	Password     string `mapstructure:"password"`
-	MaxIdleConns int    `mapstructure:"maxIdleConns"`
-	MaxOpenConns int    `mapstructure:"maxOpenConns"`
-	MaxLifetime  int    `mapstructure:"maxLifetime"`
-}
+var ( // Biến được khới tạo để chứa các dữ liệu trong suốt quá trình chạy
+	Config setting.Confg     // Chứa các dữ liệu cấu hình
+	Log    *logger.LoggerZap // chứa log là zap vd global.Log.Info("message")
+	Mdb    *gorm.DB          // chứa kết nối đến database
+)

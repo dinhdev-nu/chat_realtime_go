@@ -3,6 +3,7 @@ package logger
 import (
 	"os"
 
+	"github.com/dinhdev-nu/realtime_auth_go/setting"
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -12,17 +13,16 @@ type LoggerZap struct {
 	*zap.Logger
 }
 
-func NewLogger() *LoggerZap {
-	zapLog:= zapcore.NewCore(configEncoderLogger(), writeSync(), getLogLevel())
+func NewLogger(logConfg setting.Logger) *LoggerZap {
+	zapLogCore:= zapcore.NewCore(configEncoderLogger(), writeSync(logConfg), getLogLevel(logConfg.Level))
 
-	return &LoggerZap{zap.New(zapLog, zap.AddCaller())} // zap.AddCaller() -> option để show caller
-
+	return  &LoggerZap{zap.New(zapLogCore, zap.AddCaller())}// zap.AddCaller() -> option để show caller
 }
 
 func configEncoderLogger() zapcore.Encoder {
 	enCodeConfig:= zap.NewProductionEncoderConfig()
 
-	enCodeConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder // info -> INFO
+	enCodeConfig.EncodeLevel = zapcore.CapitalLevelEncoder // info -> INFO
 	enCodeConfig.TimeKey = "time" // ts -> time
 	enCodeConfig.EncodeTime = zapcore.ISO8601TimeEncoder // time -> 2021-09-09T12:12:12.123456Z
 	enCodeConfig.EncodeCaller = zapcore.ShortCallerEncoder // /path/to/file.go:line -> file.go:line
@@ -31,13 +31,13 @@ func configEncoderLogger() zapcore.Encoder {
 
 }
 
-func writeSync() zapcore.WriteSyncer {
+func writeSync(logConfg setting.Logger) zapcore.WriteSyncer {
 	fileWrite:= lumberjack.Logger{
-		Filename:  "log/log.xxx.log",
-		MaxSize:   10, // 10MB
-		MaxBackups: 10, // 10 file backup
-		MaxAge:    10, // 10 days
-		Compress:  true, // Nén file cũ
+		Filename:  logConfg.File,
+		MaxSize:   logConfg.MaxSize, // 10MB
+		MaxBackups: logConfg.MaxBackups, // 10 file backup
+		MaxAge:    logConfg.MaxAge, // 30 days
+		Compress:  logConfg.Compress, // compress
 	}
 
 	return zapcore.NewMultiWriteSyncer(
@@ -47,8 +47,8 @@ func writeSync() zapcore.WriteSyncer {
 }
 
 // debug -> info -> warn -> error -> panic -> fatal
-func getLogLevel() zapcore.Level {
-	logLevel:= "debug"
+func getLogLevel(levelConfig string) zapcore.Level {
+	logLevel:= levelConfig
 	var level zapcore.Level 
 	
 	switch logLevel {
@@ -64,6 +64,8 @@ func getLogLevel() zapcore.Level {
 			level = zapcore.PanicLevel // lỗi và ct dừng lại
 		case "fatal":
 			level = zapcore.FatalLevel // ct dừng lại
+		default:
+			level = zapcore.DebugLevel
 	}
 
 	return level

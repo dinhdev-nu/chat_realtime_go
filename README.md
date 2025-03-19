@@ -28,6 +28,11 @@ or
 
 ## Database 
 ### MySql 
+**Auth service**
+-- GORM: <code>go get -u gorm.io/gorm</code> 
+
+**Chat** 
+-- Sqlc 
 
 
 ### Interface

@@ -1,0 +1,2 @@
+{"level":"INFO","time":"2025-03-19T21:19:18.074+0700","caller":"internal/initialize.go:19","msg":"Server is starting..."}
+{"level":"INFO","time":"2025-03-19T21:46:20.201+0700","caller":"internal/initialize.go:19","msg":"Server is starting..."}

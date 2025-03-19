@@ -1,0 +1,2 @@
+{"level":"\u001b[34mINFO\u001b[0m","time":"2025-03-19T16:11:19.023+0700","caller":"internal/initialize.go:19","msg":"Start server"}
+{"level":"INFO","time":"2025-03-19T16:15:04.250+0700","caller":"internal/initialize.go:19","msg":"Start server"}
