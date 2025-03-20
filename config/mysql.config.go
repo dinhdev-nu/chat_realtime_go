@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/dinhdev-nu/realtime_auth_go/global"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -16,7 +17,7 @@ func InitMysql() {
 	var s = fmt.Sprintf(dsn, msql.Username, msql.Password, msql.Host, msql.Port, msql.Dbname)
 
 	db, err := gorm.Open(mysql.Open(s), &gorm.Config{
-		SkipDefaultTransaction: true, // close transaction
+		SkipDefaultTransaction: true, // Bỏ qua transaction mặc định để tăng hiệu suất
 	})
 	if err != nil {
 		global.Log.Error("Failed to connect to MySQL" + err.Error())
@@ -26,19 +27,34 @@ func InitMysql() {
 	global.Mdb = db
 	global.Log.Info("Connected to MySQL successfully")
 
-	setPoolSize()
+	if err := setPoolSize(); err != nil {
+		fmt.Println("::::::::::: Set pool size err: ", err)
+
+	}
+
+	if err := migrateTables(); err != nil {
+		fmt.Println("::::::::::: Migrate tables err: ", err)
+	}
 }
 
 // InnitMysql().setPoolSize(global.Mdb) // method chaining
 
-func setPoolSize() {
+func setPoolSize() error {
 	mdb := global.Mdb
 	msql := global.Config.MySql
 	sqlDB, err := mdb.DB()
 	if err != nil {
-		fmt.Println("Mysql pool err: ", err)
+		return err
 	}
 	sqlDB.SetConnMaxIdleTime(time.Duration(msql.MaxIdleConns)) // Thời gian tối đa mà một kết nối có thể ở trong pool trước khi bị đóng
 	sqlDB.SetMaxOpenConns(msql.MaxOpenConns)                   // Số lượng kết nối tối đa mà có thể mở
 	sqlDB.SetConnMaxLifetime(time.Duration(msql.MaxLifetime))  // Thời gian tối đa mà một kết nối có thể sống
+
+	return nil
+}
+
+func migrateTables() error {
+	return global.Mdb.AutoMigrate(
+		&models.User{},
+	)
 }

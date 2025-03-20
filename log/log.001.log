@@ -1,2 +1,6 @@
 {"level":"INFO","time":"2025-03-19T21:19:18.074+0700","caller":"internal/initialize.go:19","msg":"Server is starting..."}
 {"level":"INFO","time":"2025-03-19T21:46:20.201+0700","caller":"internal/initialize.go:19","msg":"Server is starting..."}
+{"level":"INFO","time":"2025-03-20T20:42:20.201+0700","caller":"config/mysql.config.go:28","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-03-20T20:43:31.776+0700","caller":"config/mysql.config.go:28","msg":"Connected to MySQL successfully"}
+{"level":"ERROR","time":"2025-03-20T21:25:40.200+0700","caller":"config/mysql.config.go:23","msg":"Failed to connect to MySQLdial tcp [::1]:3306: connectex: No connection could be made because the target machine actively refused it."}
+{"level":"INFO","time":"2025-03-20T21:27:26.097+0700","caller":"config/mysql.config.go:28","msg":"Connected to MySQL successfully"}
