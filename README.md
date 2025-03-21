@@ -33,7 +33,8 @@ or
 
 **Chat** 
 -- Sqlc 
-
+### Redis
+<code>go get github.com/redis/go-redis/v9</code>
 
 ### Interface
 

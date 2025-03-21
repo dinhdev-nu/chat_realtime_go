@@ -12,22 +12,22 @@ import (
 
 func Run() {
 
-	// Config 
-	c.LoadConfig(); // fmt.Print(global.Config.Server.Port)
+	// Config
+	c.LoadConfig() // fmt.Print(global.Config.Server.Port)
 	c.InitLogger() // g.Log.Info("Server is starting...")
 	c.InitMysql()
+	c.InitRedis()
 
-	r:= gin.Default() // Init gin router
+	r := gin.Default() // Init gin router
 
 	// Middlewares
 	// r.Use(middlewares.ErrorMiddleware())
 	r.Use(middlewares.Cors())
 	// r.Use(middlewares.Logger())
 
+	server := router.InitRouter(r)
 
-	server:= router.InitRouter(r)
- 
-	http:= fmt.Sprintf("%s:%s", g.Config.Server.Host, g.Config.Server.Port)
+	http := fmt.Sprintf("%s:%s", g.Config.Server.Host, g.Config.Server.Port)
 	server.Run(http) // run server
 
 }

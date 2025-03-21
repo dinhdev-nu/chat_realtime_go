@@ -4,3 +4,9 @@
 {"level":"INFO","time":"2025-03-20T20:43:31.776+0700","caller":"config/mysql.config.go:28","msg":"Connected to MySQL successfully"}
 {"level":"ERROR","time":"2025-03-20T21:25:40.200+0700","caller":"config/mysql.config.go:23","msg":"Failed to connect to MySQLdial tcp [::1]:3306: connectex: No connection could be made because the target machine actively refused it."}
 {"level":"INFO","time":"2025-03-20T21:27:26.097+0700","caller":"config/mysql.config.go:28","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-03-21T11:39:50.755+0700","caller":"config/mysql.config.go:28","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-03-21T11:39:50.875+0700","caller":"config/redis.config.go:29","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-03-21T11:40:30.929+0700","caller":"config/mysql.config.go:28","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-03-21T11:40:31.037+0700","caller":"config/redis.config.go:29","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-03-21T17:44:37.820+0700","caller":"config/mysql.config.go:28","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-03-21T17:44:37.929+0700","caller":"config/redis.config.go:29","msg":"Connected to Redis successfully"}

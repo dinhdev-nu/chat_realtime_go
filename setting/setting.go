@@ -3,6 +3,7 @@ package setting
 type Confg struct {
 	Server Server `mapstructure:"server"`
 	MySql  MySql  `mapstructure:"mysql"`
+	Redis  Redis  `mapstructure:"redis"`
 	Logger Logger `mapstructure:"log"`
 }
 
@@ -20,6 +21,13 @@ type MySql struct {
 	MaxIdleConns int    `mapstructure:"maxIdleConns"`
 	MaxOpenConns int    `mapstructure:"maxOpenConns"`
 	MaxLifetime  int    `mapstructure:"maxLifetime"`
+}
+
+type Redis struct {
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	Password string `mapstructure:"password"`
+	Database int    `mapstructure:"database"`
 }
 
 type Logger struct {
