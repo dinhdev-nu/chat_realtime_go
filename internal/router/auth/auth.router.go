@@ -2,29 +2,23 @@ package auth
 
 import (
 	c "github.com/dinhdev-nu/realtime_auth_go/internal/controller"
-	service "github.com/dinhdev-nu/realtime_auth_go/internal/service/auth"
 	"github.com/gin-gonic/gin"
 )
 
-type AuthRouter struct{
+type AuthRouter struct {
 	AuthControler *c.AuthController
 }
 
-func NewAuthRouter() *AuthRouter {
-	
-	authService:= service.DefaultAuthService()
-	authController:= c.NewAuthController(authService)
-	// nên sử dung Wire 
-
+func NewAuthRouter(ac *c.AuthController) *AuthRouter {
+	//dependency injection thủ công
+	// nên sử dung Wire
 	return &AuthRouter{
-		AuthControler: authController,
+		AuthControler: ac,
 	}
 }
 
 func (ar *AuthRouter) InitRoutes(router *gin.RouterGroup) {
 
-	
-	
 	// This group is for public route not need authentication
 	authRouterGroupPublic := router.Group("auth")
 	{
@@ -41,5 +35,3 @@ func (ar *AuthRouter) InitRoutes(router *gin.RouterGroup) {
 		authRouterGroupPrivate.GET("/ping", ar.AuthControler.Ping)
 	}
 }
-
-

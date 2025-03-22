@@ -13,12 +13,19 @@ import (
 func Run() {
 
 	// Config
-	c.LoadConfig() // fmt.Print(global.Config.Server.Port)
+	c.LoadConfig() // fmt.Print(global.Config.Server.Port) load config from environment
 	c.InitLogger() // g.Log.Info("Server is starting...")
 	c.InitMysql()
 	c.InitRedis()
 
-	r := gin.Default() // Init gin router
+	// Init gin router
+	var r *gin.Engine
+	if g.Config.Server.Mode == "dev" {
+		r = gin.Default() // log, recovery, cors default của gin
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+		r = gin.New() // no log, no recovery, no cors
+	}
 
 	// Middlewares
 	// r.Use(middlewares.ErrorMiddleware())

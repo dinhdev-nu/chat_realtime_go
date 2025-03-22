@@ -10,6 +10,7 @@ type Confg struct {
 type Server struct {
 	Host string `mapstructure:"host"`
 	Port string `mapstructure:"port"`
+	Mode string `mapstructure:"mode"`
 }
 
 type MySql struct {

@@ -7,15 +7,15 @@ import (
 )
 
 type AuthController struct {
-	AuthService *service.AuthService
+	AuthService service.IAuthService
 }
 
-func NewAuthController(authService *service.AuthService) *AuthController {
+func NewAuthController(authService service.IAuthService) *AuthController {
 	return &AuthController{
-		AuthService: service.DefaultAuthService(),
+		AuthService: authService,
 	}
 }
-	
+
 func (ac *AuthController) Ping(ctx *gin.Context) {
 	res.SuccessResponse(ctx, ac.AuthService.Ping())
 	// res.BadRequestError(ctx, 4001, "Error")

@@ -5,20 +5,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type AuthService struct{
-	AuthRepo *repo.AuthRepo
+type IAuthService interface {
+	Ping() *gin.H
 }
 
-func NewAuthServiceContructer(authRepo *repo.AuthRepo) *AuthService { 
-	return &AuthService{AuthRepo: authRepo}
+type authService struct { // Viết thường là private và viết hoa là public
+	repo repo.IAuthRepo
 }
 
-func DefaultAuthService() *AuthService {
-	return NewAuthServiceContructer(repo.NewAuthRepo())
+func NewAuthService(authRepo repo.IAuthRepo) IAuthService {
+	return &authService{repo: authRepo}
 }
 
-func (as *AuthService) Ping() *gin.H {
+func (as *authService) Ping() *gin.H {
 	return &gin.H{
-		"message": as.AuthRepo.GetPing(),
+		"message": as.repo.GetPing(),
 	}
 }
