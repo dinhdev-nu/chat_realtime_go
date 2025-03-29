@@ -29,7 +29,7 @@ or
 ## Database 
 ### MySql 
 **Auth service**
--- GORM: <code>go get -u gorm.io/gorm</code> 
+-- GORM: <code>go get -u gorm.io/gorm</code> and <code>go get -u gorm.io/gen</code> gen mysql -> po struct go
 
 **Chat** 
 -- Sqlc 

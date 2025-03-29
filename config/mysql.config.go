@@ -5,8 +5,9 @@ import (
 	"time"
 
 	"github.com/dinhdev-nu/realtime_auth_go/global"
-	"github.com/dinhdev-nu/realtime_auth_go/internal/models"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/model"
 	"gorm.io/driver/mysql"
+	"gorm.io/gen"
 	"gorm.io/gorm"
 )
 
@@ -32,9 +33,10 @@ func InitMysql() {
 
 	}
 
-	if err := migrateTables(); err != nil {
-		fmt.Println("::::::::::: Migrate tables err: ", err)
-	}
+	// if err := migrateTables(); err != nil {
+	// 	fmt.Println("::::::::::: Migrate tables err: ", err)
+	// }
+	// generatePo()
 }
 
 // InnitMysql().setPoolSize(global.Mdb) // method chaining
@@ -55,6 +57,17 @@ func setPoolSize() error {
 
 func migrateTables() error {
 	return global.Mdb.AutoMigrate(
-		&models.User{},
+		&model.GoDbUser{},
 	)
+}
+
+func generatePo() {
+	g := gen.NewGenerator(gen.Config{
+		OutPath: "internal/model",
+		Mode:    gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface,
+	})
+
+	g.UseDB(global.Mdb)
+	g.GenerateModel("go_db_user")
+	g.Execute()
 }

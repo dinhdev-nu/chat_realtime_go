@@ -10,11 +10,19 @@ require (
 )
 
 require (
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/go-sql-driver/mysql v1.7.0 // indirect
+	github.com/go-sql-driver/mysql v1.9.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/redis/go-redis/v9 v9.7.2 // indirect
+	golang.org/x/mod v0.24.0 // indirect
+	golang.org/x/sync v0.12.0 // indirect
+	golang.org/x/tools v0.31.0 // indirect
+	gorm.io/datatypes v1.2.5 // indirect
+	gorm.io/gen v0.3.26 // indirect
+	gorm.io/hints v1.1.2 // indirect
+	gorm.io/plugin/dbresolver v1.5.3 // indirect
 )
 
 require (

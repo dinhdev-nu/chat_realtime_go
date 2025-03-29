@@ -6,7 +6,6 @@ import (
 	c "github.com/dinhdev-nu/realtime_auth_go/config"
 	g "github.com/dinhdev-nu/realtime_auth_go/global"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/router"
-	"github.com/dinhdev-nu/realtime_auth_go/pkg/middlewares"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,7 +28,7 @@ func Run() {
 
 	// Middlewares
 	// r.Use(middlewares.ErrorMiddleware())
-	r.Use(middlewares.Cors())
+	// r.Use(middlewares.Cors())
 	// r.Use(middlewares.Logger())
 
 	server := router.InitRouter(r)

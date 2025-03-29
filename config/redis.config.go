@@ -30,18 +30,18 @@ func InitRedis() {
 	// TestRedis()
 }
 
-// func TestRedis() {
-// 	err := global.Rdb.Set(ctx, "key", "value", 10).Err()
-// 	if err != nil {
-// 		fmt.Print("Error: ", err)
-// 		return
-// 	}
+func TestRedis() {
+	err := global.Rdb.Set(ctx, "key", "value", 0).Err()
+	if err != nil {
+		fmt.Print("Error 1 -------------: ", err)
+		return
+	}
 
-// 	getVey, err := global.Rdb.Get(ctx, "key").Result()
-// 	if err != nil {
-// 		fmt.Print("Error: ", err)
-// 		return
-// 	}
-// 	fmt.Println("Key:::::::::::::::::::::", getVey)
+	getVey, err := global.Rdb.Get(ctx, "key").Result()
+	if err != nil {
+		fmt.Print("Error 11 ---------: ", err)
+		return
+	}
+	fmt.Println("Key:::::::::::::::::::::", getVey)
 
-// }
+}

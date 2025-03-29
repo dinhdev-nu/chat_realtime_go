@@ -27,6 +27,9 @@ func (ar *AuthRouter) InitRoutes(router *gin.RouterGroup) {
 				"message": "ping",
 			})
 		})
+		authRouterGroupPublic.POST("/register", ar.AuthControler.Register)
+		authRouterGroupPublic.POST("/send-otp", ar.AuthControler.SendOtp)
+		authRouterGroupPublic.POST("/verify-otp", ar.AuthControler.VerifyOtp)
 	}
 
 	// This group is for private route need authentication
