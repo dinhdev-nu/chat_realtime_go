@@ -5,6 +5,7 @@ type Confg struct {
 	MySql  MySql  `mapstructure:"mysql"`
 	Redis  Redis  `mapstructure:"redis"`
 	Logger Logger `mapstructure:"log"`
+	Jwt    Jwt    `mapstructure:"jwt"`
 }
 
 type Server struct {
@@ -38,4 +39,9 @@ type Logger struct {
 	MaxBackups int    `mapstructure:"maxbackups"`
 	MaxAge     int    `mapstructure:"maxage"`
 	Compress   bool   `mapstructure:"compress"`
+}
+
+type Jwt struct {
+	JwtExpireTime int64  `mapstructure:"JwtExpireTime"`
+	JwtSecret     string `mapstructure:"JwtSecret"`
 }

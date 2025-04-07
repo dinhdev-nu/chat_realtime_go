@@ -44,6 +44,8 @@ or
 
 
 -- Handle error, response ...
+**JWT**
+<code>
 -- 
 
 **Logger**

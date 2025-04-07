@@ -48,7 +48,7 @@ CREATE TABLE `go_db_user_info` (
 DROP TABLE IF EXISTS `pre_go_acc_user_base_9999`;
 CREATE TABLE `pre_go_acc_user_base_9999` (
   `user_id` int NOT NULL AUTO_INCREMENT,
-  `user_account` varchar(255) NOT NULL,
+  `user_account` varchar(255) NOT NULL, -- real email or phone number
   `user_password` varchar(255) NOT NULL,
   `user_salt` varchar(255) NOT NULL,
   `user_login_time` timestamp NULL DEFAULT NULL,

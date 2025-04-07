@@ -69,5 +69,8 @@ func generatePo() {
 
 	g.UseDB(global.Mdb)
 	g.GenerateModel("go_db_user")
+	g.GenerateModel("go_db_user_base")
+	g.GenerateModel("go_db_user_info")
+	g.GenerateModel("go_db_verify_otp")
 	g.Execute()
 }

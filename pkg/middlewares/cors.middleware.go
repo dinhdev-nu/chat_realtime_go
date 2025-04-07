@@ -8,9 +8,9 @@ import (
 func Cors() gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
-		token:= ctx.GetHeader("Authorization")
+		token := ctx.GetHeader("Authorization")
 		if token != "valid-token" {
-			response.UnauthorizedError(ctx, 3001, "Invalid Token")
+			response.UnauthorizedError(ctx)
 			ctx.Abort()
 			return
 		}
