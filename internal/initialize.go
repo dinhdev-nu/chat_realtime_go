@@ -6,6 +6,7 @@ import (
 	c "github.com/dinhdev-nu/realtime_auth_go/config"
 	g "github.com/dinhdev-nu/realtime_auth_go/global"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/router"
+	m "github.com/dinhdev-nu/realtime_auth_go/pkg/middlewares"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,13 +24,15 @@ func Run() {
 		r = gin.Default() // log, recovery, cors default của gin
 	} else {
 		gin.SetMode(gin.ReleaseMode)
-		r = gin.New() // no log, no recovery, no cors
+		r = gin.New() // no log, no recovery
 	}
 
 	// Middlewares
-	// r.Use(middlewares.ErrorMiddleware())
-	// r.Use(middlewares.Cors())
-	// r.Use(middlewares.Logger())
+	r.Use(m.Cors())
+	r.Use(m.LoggerMidleware())
+	r.Use(m.ErrorMiddleware())
+	r.Use(m.RateLimitMiddleware())
+	r.Use(m.Authorzation())
 
 	server := router.InitRouter(r)
 

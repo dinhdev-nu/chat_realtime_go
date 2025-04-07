@@ -36,16 +36,11 @@ or
 ### Redis
 <code>go get github.com/redis/go-redis/v9</code>
 
-### Interface
-
 **Wire**
--- clean up dependencies from params to the function to use
-<code></code>
-
 
 -- Handle error, response ...
 **JWT**
-<code>
+<code>go get -u github.com/golang-jwt/jwt/v5</code>
 -- 
 
 **Logger**

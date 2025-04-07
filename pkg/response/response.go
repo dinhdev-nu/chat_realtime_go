@@ -13,6 +13,11 @@ type Response struct {
 }
 
 // Sử lý các error cụ thể
+
+func TooManyRequests(ctx *gin.Context) {
+	JSON(ctx, http.StatusTooManyRequests, TooManyRequestsCode, CodeMessage[TooManyRequestsCode], nil)
+}
+
 func BadRequestError(ctx *gin.Context, code int, mes string) { // 400
 	JSON(ctx, http.StatusBadRequest, code, mes, nil)
 }

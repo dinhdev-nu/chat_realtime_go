@@ -20,12 +20,14 @@ func AuthMiddleware() gin.HandlerFunc {
 		userId := c.Request.Header.Get("Client-Id")
 		if token == "" || userId == "" {
 			res.UnauthorizedError(c)
+			c.Abort()
 			return
 		}
 		// verify token
 		claims, err := jwt.VerifyToken(token)
 		if err != nil {
 			res.UnauthorizedError(c)
+			c.Abort()
 			return
 		}
 		// check userId in token and header
@@ -33,21 +35,25 @@ func AuthMiddleware() gin.HandlerFunc {
 		tokenId := uuidToken[:strings.Index(uuidToken, "token")]
 		if tokenId != userId {
 			res.UnauthorizedError(c)
+			c.Abort()
 			return
 		}
 		user, err := global.Rdb.Get(context.Background(), uuidToken).Result()
 		if err != nil {
 			res.BadRequestError(c, res.ServerErrorCode, res.CodeMessage[res.ServerErrorCode])
+			c.Abort()
 			return
 		}
 		userInfo := &model.GoDbUserInfo{}
 		err = json.Unmarshal([]byte(user), userInfo)
 		if err != nil {
 			res.BadRequestError(c, res.ServerErrorCode, res.CodeMessage[res.ServerErrorCode])
+			c.Abort()
 			return
 		}
 		if id, _ := strconv.Atoi(userId); id != int(userInfo.UserID) {
 			res.UnauthorizedError(c)
+			c.Abort()
 			return
 		}
 

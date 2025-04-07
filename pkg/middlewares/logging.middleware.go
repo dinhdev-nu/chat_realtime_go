@@ -8,17 +8,18 @@ import (
 	"go.uber.org/zap"
 )
 
-func Logger() gin.HandlerFunc {
+func LoggerMidleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		start:= time.Now()
+		start := time.Now()
+
 		c.Next()
 
-		global.Log.Info("Resqest log::: ", 
-		zap.String("method", c.Request.Method),
-		zap.String("path", c.Request.URL.Path),
-		zap.Int("status", c.Writer.Status()),
-		zap.Duration("latency", time.Since(start)),
-		zap.String("client_ip", c.ClientIP()),
+		global.Log.Info("Resqest log::: ",
+			zap.String("method", c.Request.Method),
+			zap.String("path", c.Request.URL.Path),
+			zap.Int("status", c.Writer.Status()),
+			zap.Duration("latency", time.Since(start)),
+			zap.String("client_ip", c.ClientIP()),
 		)
 	}
 }

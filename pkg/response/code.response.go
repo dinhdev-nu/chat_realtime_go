@@ -1,9 +1,10 @@
 package response
 
 const (
-	SuccessCode   = 2001
-	ErrorCode     = 4001
-	ForbiddenCode = 4031
+	SuccessCode         = 2001
+	ErrorCode           = 4001
+	ForbiddenCode       = 4031
+	TooManyRequestsCode = 4291
 
 	InvalidToken              = 3001
 	InvalidRequestPayloadCode = 4000
@@ -27,9 +28,10 @@ const (
 )
 
 const (
-	SuccessMessage   = "Success"
-	ErrorMessage     = "Error"
-	ForbiddenMessage = "Forbidden"
+	SuccessMessage         = "Success"
+	ErrorMessage           = "Error"
+	ForbiddenMessage       = "Forbidden"
+	TooManyRequestsMessage = "Too Many Requests"
 
 	InvalidTokenMessage            = "Invalid Token"
 	ErrorEmailExistMessage         = "Email Exist"
@@ -63,4 +65,5 @@ var CodeMessage = map[int]string{
 	ForbiddenCode:             ForbiddenMessage,
 	ErrorDeleteCode:           ErrorDeleteMessage,
 	ErrorUpdateCode:           ErrorUpdateMessage,
+	TooManyRequestsCode:       TooManyRequestsMessage,
 }

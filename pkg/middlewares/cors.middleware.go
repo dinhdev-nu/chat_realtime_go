@@ -1,20 +1,14 @@
 package middlewares
 
-import (
-	"github.com/dinhdev-nu/realtime_auth_go/pkg/response"
-	"github.com/gin-gonic/gin"
-)
+import "github.com/gin-gonic/gin"
 
 func Cors() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")                                                     //chấp nhận các domain client khác nhau
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")                      // chấp nhận các phương	thức
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization Client-Id Authentication") // chấp nhận các header khác nhau
+		c.Header("Access-Control-Allow-Credentials", "true")                                             // cho phép gửi cookie từ client
 
-	return func(ctx *gin.Context) {
-		token := ctx.GetHeader("Authorization")
-		if token != "valid-token" {
-			response.UnauthorizedError(ctx)
-			ctx.Abort()
-			return
-		}
-		ctx.Next()
+		c.Next()
 	}
-
 }
