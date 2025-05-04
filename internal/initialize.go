@@ -32,7 +32,7 @@ func Run() {
 	r.Use(m.LoggerMidleware())
 	r.Use(m.ErrorMiddleware())
 	r.Use(m.RateLimitMiddleware())
-	r.Use(m.Authorzation())
+	// r.Use(m.Authorzation())
 
 	server := router.InitRouter(r)
 

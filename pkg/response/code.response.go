@@ -6,6 +6,8 @@ const (
 	ForbiddenCode       = 4031
 	TooManyRequestsCode = 4291
 
+	UpgradeWebSocketErrorCode = 1001
+
 	InvalidToken              = 3001
 	InvalidRequestPayloadCode = 4000
 
@@ -32,6 +34,8 @@ const (
 	ErrorMessage           = "Error"
 	ForbiddenMessage       = "Forbidden"
 	TooManyRequestsMessage = "Too Many Requests"
+
+	UpgradeWebSocketErrorMessage = "Upgrade WebSocket Error"
 
 	InvalidTokenMessage            = "Invalid Token"
 	ErrorEmailExistMessage         = "Email Exist"
@@ -66,4 +70,5 @@ var CodeMessage = map[int]string{
 	ErrorDeleteCode:           ErrorDeleteMessage,
 	ErrorUpdateCode:           ErrorUpdateMessage,
 	TooManyRequestsCode:       TooManyRequestsMessage,
+	UpgradeWebSocketErrorCode: UpgradeWebSocketErrorMessage,
 }

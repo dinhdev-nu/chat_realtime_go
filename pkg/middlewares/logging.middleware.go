@@ -20,6 +20,7 @@ func LoggerMidleware() gin.HandlerFunc {
 			zap.Int("status", c.Writer.Status()),
 			zap.Duration("latency", time.Since(start)),
 			zap.String("client_ip", c.ClientIP()),
+			zap.String("error", c.Errors.String()),
 		)
 	}
 }

@@ -126,3 +126,114 @@
 {"level":"INFO","time":"2025-04-06T21:22:49.575+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
 {"level":"INFO","time":"2025-04-07T09:50:10.093+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
 {"level":"INFO","time":"2025-04-07T09:50:10.097+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-03T09:21:06.925+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-03T09:21:06.931+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-03T09:23:49.443+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-03T09:23:49.449+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-03T09:24:37.919+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-03T09:24:37.924+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-03T09:27:34.055+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-03T09:27:34.063+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-03T09:28:17.238+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":403,"latency":0,"client_ip":"127.0.0.1"}
+{"level":"INFO","time":"2025-05-03T09:35:24.906+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-03T09:35:24.914+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-03T09:35:29.675+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":403,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-03T09:36:13.141+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-03T09:36:13.146+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-03T09:36:15.736+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":403,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-03T09:40:06.134+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":18.8579253,"client_ip":"127.0.0.1","error":"Error #01: http: connection has been hijacked\n"}
+{"level":"INFO","time":"2025-05-03T16:29:16.978+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-03T16:29:16.986+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-03T16:30:23.920+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-03T16:30:45.400+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0.0007782,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-03T16:34:03.015+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0.001377,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-03T16:35:00.984+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-03T20:35:08.101+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-03T20:35:08.115+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-03T20:35:27.365+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0.0009984,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-03T20:36:02.862+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-03T20:37:04.599+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T09:35:25.051+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T09:35:25.062+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T09:35:56.104+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T09:35:58.770+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T09:36:03.709+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T10:13:40.488+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T10:13:40.497+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T10:14:35.284+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T10:14:38.465+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0.0005046,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T10:14:41.074+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T10:21:16.746+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T10:21:16.754+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T10:21:19.833+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0.0005418,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T10:21:22.761+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T10:38:54.953+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T10:38:54.963+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T10:38:58.265+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0.0005064,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T10:39:00.902+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T10:49:55.110+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T10:49:55.117+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T10:50:04.468+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T10:50:07.691+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T11:02:06.166+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T11:02:06.174+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T11:03:29.314+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T11:03:29.321+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T11:03:45.613+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T11:03:49.008+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T11:04:37.149+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T11:04:37.154+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T11:04:44.155+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T11:04:47.005+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T11:08:18.382+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T11:08:18.392+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T11:08:25.081+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T11:08:27.993+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T11:21:54.740+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T11:21:54.747+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T11:22:04.025+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T11:22:06.245+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T11:24:17.532+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T11:24:17.539+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T11:24:22.145+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T11:24:24.673+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"ERROR","time":"2025-05-04T11:37:06.215+0700","caller":"config/mysql.config.go:24","msg":"Failed to connect to MySQLdial tcp [::1]:3306: connectex: No connection could be made because the target machine actively refused it."}
+{"level":"INFO","time":"2025-05-04T13:21:12.145+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T13:21:12.153+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T13:21:33.088+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0.0008833,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:21:35.488+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0.0009424,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:26:59.981+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T13:26:59.994+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T13:27:03.499+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:27:06.431+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:27:38.427+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T13:27:38.433+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T13:27:41.225+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:29:09.446+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:29:31.623+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:29:58.181+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:32:25.948+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T13:32:25.953+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T13:32:30.099+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:32:32.526+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:32:34.672+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:33:21.946+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:37:05.912+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:39:56.267+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0.00037,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:39:58.322+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:40:00.480+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:42:25.258+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T13:42:25.267+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T13:42:28.184+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0.0005553,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:42:31.144+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:42:33.240+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:45:51.511+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T13:45:51.516+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T13:46:00.152+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:46:03.515+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T13:46:05.668+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0.0020063,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T14:31:31.330+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-04T14:31:31.341+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-04T14:33:07.754+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T14:33:09.967+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-04T14:33:23.996+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}

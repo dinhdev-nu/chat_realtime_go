@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/dinhdev-nu/realtime_auth_go/internal/router/auth"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/router/chat"
 	di "github.com/dinhdev-nu/realtime_auth_go/internal/wire"
 	"github.com/gin-gonic/gin"
 )
@@ -17,11 +18,12 @@ func newRouterMain() *RouterMain {
 	return &RouterMain{
 		Routers: []Router{
 			auth.NewAuthRouter(container.AuthController),
+			chat.NewChatRouter(),
 		},
 	}
 }
 
-// Hàn khỏi tại tất cả các route của RouterMain thế quy đinh interface Router
+// Hàm khởi tạo tất cả các route của RouterMain thế quy đinh interface Router
 func (rm *RouterMain) initRoutes(api *gin.RouterGroup) {
 	for _, r := range rm.Routers {
 		r.InitRoutes(api)
