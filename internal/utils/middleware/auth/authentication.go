@@ -18,10 +18,17 @@ func AuthMiddleware() gin.HandlerFunc {
 		// get token from header
 		token := c.Request.Header.Get("Authentication")
 		userId := c.Request.Header.Get("Client-Id")
+
 		if token == "" || userId == "" {
-			res.UnauthorizedError(c)
-			c.Abort()
-			return
+
+			token = c.GetString("token")
+			userId = c.GetString("user_id")
+			if token == "" || userId == "" {
+
+				res.UnauthorizedError(c)
+				c.Abort()
+				return
+			}
 		}
 		// verify token
 		claims, err := jwt.VerifyToken(token)

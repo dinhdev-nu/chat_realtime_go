@@ -10,7 +10,9 @@ func Authorzation() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// get header
 		token := c.GetHeader("Authorization")
-
+		if token == "" {
+			token = c.Query("key")
+		}
 		// get db
 
 		// compare token with db

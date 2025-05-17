@@ -18,11 +18,18 @@ var upgrader = websocket.Upgrader{
 
 func HandleWebSocket(hub *Hub) gin.HandlerFunc {
 	return func(c *gin.Context) {
+
+		// check token
+		token := c.Query("token")    // lấy token từ query string
 		userID := c.Query("user_id") // lấy userID từ query string
-		if userID == "" {
+		if userID == "" || token == "" {
 			response.BadRequestError(c, response.UpgradeWebSocketErrorCode, "user_id is required") // nếu không có userID thì trả về lỗi
 			return
 		}
+		c.Set("user_id", userID) // gán userID vào context để sử dụng sau này
+		c.Set("token", token)    // gán token vào context để sử dụng sau này
+
+		c.Next()
 
 		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil) // upgrade kết nối từ http sang websocket
 		if err != nil {

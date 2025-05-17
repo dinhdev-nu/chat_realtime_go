@@ -237,3 +237,17 @@
 {"level":"INFO","time":"2025-05-04T14:33:07.754+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
 {"level":"INFO","time":"2025-05-04T14:33:09.967+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
 {"level":"INFO","time":"2025-05-04T14:33:23.996+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"GET","path":"/v1/api/chat/ws","status":200,"latency":0,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-17T08:45:37.927+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-17T08:45:37.933+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-17T08:48:55.750+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"POST","path":"/v1/api/auth/register","status":200,"latency":0.0211215,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-17T08:58:51.492+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-17T08:58:51.502+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-17T08:59:04.171+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"POST","path":"/v1/api/auth/send-otp","status":200,"latency":3.190521,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-17T09:00:59.796+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"POST","path":"/v1/api/auth/verify-otp","status":200,"latency":0.0046711,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-17T09:10:18.212+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"POST","path":"/v1/api/auth/sign-up","status":200,"latency":0.0482532,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-17T16:48:42.604+0700","caller":"config/mysql.config.go:29","msg":"Connected to MySQL successfully"}
+{"level":"INFO","time":"2025-05-17T16:48:42.617+0700","caller":"config/redis.config.go:28","msg":"Connected to Redis successfully"}
+{"level":"INFO","time":"2025-05-17T16:52:45.207+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"POST","path":"/v1/api/auth/register","status":200,"latency":0.0234349,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-17T16:53:25.326+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"POST","path":"/v1/api/auth/send-otp","status":200,"latency":3.7216714,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-17T16:54:27.930+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"POST","path":"/v1/api/auth/verify-otp","status":200,"latency":0.0075511,"client_ip":"127.0.0.1","error":""}
+{"level":"INFO","time":"2025-05-17T16:54:38.679+0700","caller":"middlewares/logging.middleware.go:17","msg":"Resqest log::: ","method":"POST","path":"/v1/api/auth/sign-up","status":200,"latency":0.027953,"client_ip":"127.0.0.1","error":""}

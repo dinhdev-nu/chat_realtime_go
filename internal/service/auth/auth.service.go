@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/dinhdev-nu/realtime_auth_go/config"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/repo"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/utils"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/utils/crypto"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/utils/jwt"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/utils/random"
 	"github.com/dinhdev-nu/realtime_auth_go/pkg/response"
-	"github.com/gin-gonic/gin"
 )
 
 type IAuthService interface {
-	Register(email string) (*gin.H, int)
+	Register(email string) (map[string]string, int)
 	SendOtp(email string) int // int là mã lỗi
 	VeryfyOtp(email string, otp string) (string, int)
 	SignUp(email string, password string) int
@@ -32,7 +32,7 @@ func NewAuthService(authRepo repo.IAuthRepo) IAuthService {
 	return &authService{repo: authRepo}
 }
 
-func (as *authService) Register(email string) (*gin.H, int) {
+func (as *authService) Register(email string) (map[string]string, int) {
 
 	// hash email tránh lộ email để otp
 	emailHash := crypto.HashEmail(email)
@@ -50,9 +50,8 @@ func (as *authService) Register(email string) (*gin.H, int) {
 	// create user info default
 	go as.repo.CreateUserRegis(emailHash, email)
 
-	return &gin.H{
-		"message": "ok",
-		"pass":    emailHash,
+	return map[string]string{
+		"email": email,
 	}, response.SuccessCode
 }
 
@@ -72,7 +71,11 @@ func (as *authService) SendOtp(email string) int {
 	// generaet opt
 	opt := random.CreateOtp()
 	// send otp
-	fmt.Printf("otp ::: %s\n", opt)
+	err = config.SendOTPEmailByTemplate(email, opt)
+	if err != nil {
+		fmt.Println("error send otp" + err.Error())
+		return response.ErrorOtpFail
+	}
 	// save otp vào redis
 	data := map[string]interface{}{
 		"otp":        opt,

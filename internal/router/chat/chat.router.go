@@ -1,6 +1,7 @@
 package chat
 
 import (
+	"github.com/dinhdev-nu/realtime_auth_go/internal/utils/middleware/auth"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/websocket"
 	"github.com/gin-gonic/gin"
 )
@@ -28,6 +29,6 @@ func (cr *ChatRouter) InitRoutes(router *gin.RouterGroup) {
 		chatRouter.POST("/get-conversations", nil) // ChatController.GetConversations)
 
 		// websocket endpoint
-		chatRouter.GET("/ws", websocket.HandleWebSocket(hub)) // upgrade http to websocket
+		chatRouter.GET("/ws", websocket.HandleWebSocket(hub), auth.AuthMiddleware()) // upgrade http to websocket
 	}
 }

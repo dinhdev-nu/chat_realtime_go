@@ -6,6 +6,7 @@ type Confg struct {
 	Redis  Redis  `mapstructure:"redis"`
 	Logger Logger `mapstructure:"log"`
 	Jwt    Jwt    `mapstructure:"jwt"`
+	Mail   Mail   `mapstructure:"mail"`
 }
 
 type Server struct {
@@ -44,4 +45,11 @@ type Logger struct {
 type Jwt struct {
 	JwtExpireTime int64  `mapstructure:"JwtExpireTime"`
 	JwtSecret     string `mapstructure:"JwtSecret"`
+}
+
+type Mail struct {
+	Host     string `mapstructure:"host"`
+	Port     string `mapstructure:"port"`
+	From     string `mapstructure:"from"`
+	Password string `mapstructure:"password"`
 }
