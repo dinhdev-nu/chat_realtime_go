@@ -8,6 +8,7 @@ import (
 
 	"github.com/dinhdev-nu/realtime_auth_go/global"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/model"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -15,12 +16,12 @@ type IAuthRepo interface {
 	AddOtp(email string, data map[string]interface{}, ttl int64) error
 	IncrementOtp(email string, value map[string]interface{}) error
 	GetOtp(email string) map[string]interface{}
-	DelOtp(email string) error
-	DeleteFromRedis(key string) error
+	DelOtp(email string) error        // delete otp from redis
+	DeleteFromRedis(key string) error // delete key from redis
 	AddUserKey(key string, userInfo []byte) error
 
 	GetExistEmail(email string) (bool, error)
-	GetUser(email string) (*model.GoDbUserBase, error)
+	GetUserBase(email string) (*model.GoDbUserBase, error)
 	GetUserInfoByID(userId int64) (*model.GoDbUserInfo, error)
 	GetUserInfoByEmail(email string) (*model.GoDbUserInfo, error)
 	CreateUserRegis(emailHash string, email string) error
@@ -31,6 +32,7 @@ type IAuthRepo interface {
 	UpdateUserBase(email string, data map[string]interface{}) error
 	UpdatePassword(email string, password string) error
 	UpdateLoginUser(userId int64, loginIp string) error
+	DeleteOtpUser(email string) error
 }
 
 type authRepo struct {
@@ -50,6 +52,9 @@ func (ar *authRepo) GetUserInfoByEmail(email string) (*model.GoDbUserInfo, error
 	userInfo := model.GoDbUserInfo{}
 	result := global.Mdb.Model(&userInfo).Where("user_account = ?", email).First(&userInfo)
 	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, result.Error
 	}
 	return &userInfo, nil
@@ -104,12 +109,14 @@ func (ar *authRepo) UpdateLoginUser(userId int64, loginIp string) error {
 	return nil
 }
 
-func (ar *authRepo) GetUser(email string) (*model.GoDbUserBase, error) {
+func (ar *authRepo) GetUserBase(email string) (*model.GoDbUserBase, error) {
 	user := model.GoDbUserBase{}
 	result := global.Mdb.Model(&user).Where("user_account = ?", email).First(&user)
+
 	if result.Error != nil {
 		return nil, result.Error
 	}
+
 	return &user, nil
 }
 
@@ -204,7 +211,7 @@ func (ar *authRepo) GetExistEmail(email string) (bool, error) {
 	// check email exist in db
 	var count int64
 	err := global.Mdb.Model(&model.GoDbUserInfo{}).
-		Where("user_account = ?", email).
+		Where("user_account = ? AND user_state !=?", email, 2).
 		Count(&count).Error
 	if err != nil {
 		return false, err
@@ -212,10 +219,23 @@ func (ar *authRepo) GetExistEmail(email string) (bool, error) {
 	return count > 0, nil
 }
 
+func (ar *authRepo) DeleteOtpUser(email string) error {
+	// delete otp
+	otpModel := model.GoDbVerifyOtp{}
+	result := global.Mdb.Model(&otpModel).Where("verify_key_hash = ?", email).Delete(&otpModel)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("no rows affected for otp delete")
+	}
+	return nil
+}
+
 // redis
 
 func (ar *authRepo) AddUserKey(key string, userInfo []byte) error {
-	ttl := 60 * 60 * 24 * 1 // 1 day
+	ttl := 60 * 60 // 60 minutes
 	err := global.Rdb.SetEx(ar.ctx, key, userInfo, time.Duration(ttl)*time.Second).Err()
 	if err != nil {
 		return err
@@ -263,6 +283,7 @@ func (ar *authRepo) GetOtp(email string) map[string]interface{} {
 	return data
 }
 
+// DelOtp delete otp from redis
 func (ar *authRepo) DelOtp(email string) error {
 	key := "otp:" + email + ":usr"
 	return global.Rdb.Del(ar.ctx, key).Err()

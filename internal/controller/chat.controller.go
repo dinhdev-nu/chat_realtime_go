@@ -1,13 +1,97 @@
 package controller
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/dinhdev-nu/realtime_auth_go/internal/input"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/model"
+	service "github.com/dinhdev-nu/realtime_auth_go/internal/service/chat"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/utils"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/utils/body"
+	"github.com/dinhdev-nu/realtime_auth_go/pkg/response"
+	"github.com/gin-gonic/gin"
+)
 
-type ChatController struct{}
-
-func NewChatController() *ChatController {
-	return &ChatController{}
+type ChatController struct {
+	ChatService service.IChatService
 }
 
-func (cc *ChatController) SendMessage(c *gin.Context) {
+func NewChatController(ChatService service.IChatService) *ChatController {
+	return &ChatController{
+		ChatService: ChatService,
+	}
+}
 
+func (cc *ChatController) InitChat(c *gin.Context) {
+	value, exists := c.Get("user")
+	if !exists {
+		response.BadRequestError(c, response.InvalidRequestPayloadCode, "User ID is required")
+		return
+	}
+	userInfo, ok := value.(*model.GoDbUserInfo)
+	if !ok {
+		response.BadRequestError(c, response.InvalidRequestPayloadCode, "Invalid user information")
+		return
+	}
+
+	res, err := cc.ChatService.InitChat(userInfo)
+	if err != nil {
+		response.BadRequestError(c, response.ErrorCode, err.Error())
+		return
+	}
+	response.SuccessResponse(c, res)
+}
+
+func (cc *ChatController) GetMessages(c *gin.Context) {
+	roomId := c.Param("room-id")
+	page := c.Query("page")
+	if roomId == "" {
+		response.BadRequestError(c, response.InvalidRequestPayloadCode, "Room ID is required")
+	}
+	messages, err := cc.ChatService.GetMessagesFromRoom(roomId, page)
+	if err != nil {
+		response.BadRequestError(c, response.ErrorCode, err.Error())
+		return
+	}
+	response.SuccessResponse(c, messages)
+}
+
+func (cc *ChatController) GetRoomChatById(c *gin.Context) {
+	roomId := c.Param("room_id")
+	id := utils.StringToUint64(roomId)
+
+	room, err := cc.ChatService.GetRoomChatById(id)
+	if err != nil {
+		response.BadRequestError(c, response.ErrorCode, "Room not found")
+		return
+	}
+	response.SuccessResponse(c, room)
+}
+
+func (cc *ChatController) CreateNewRoom(c *gin.Context) {
+	data, err := body.GetPayLoadFromRequestBody[input.CreateRoomInput](c)
+	if err != nil {
+		response.BadRequestError(c, response.InvalidRequestPayloadCode, err.Error())
+		return
+	}
+
+	newRoom, err := cc.ChatService.CreateRoomChat(data)
+	if err != nil {
+		response.BadRequestError(c, response.ErrorCode, err.Error())
+		return
+	}
+	response.SuccessResponse(c, newRoom)
+}
+
+func (cc *ChatController) UpdateStatusMessages(c *gin.Context) {
+	data, err := body.GetPayLoadFromRequestBody[input.UpdateStatusInput](c)
+	if err != nil {
+		response.BadRequestError(c, response.InvalidRequestPayloadCode, err.Error())
+		return
+	}
+
+	err = cc.ChatService.UpdateStatusMessages(data)
+	if err != nil {
+		response.BadRequestError(c, response.ErrorCode, err.Error())
+		return
+	}
+	response.SuccessResponse(c, "Status updated successfully")
 }

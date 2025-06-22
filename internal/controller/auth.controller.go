@@ -108,3 +108,18 @@ func (ac *AuthController) Logout(c *gin.Context) {
 	res.SuccessResponse(c, nil)
 
 }
+
+func (ac *AuthController) DelOtp(c *gin.Context) {
+	req, err := body.GetPayLoadFromRequestBody[input.EmailInput](c)
+	if err != nil {
+		res.BadRequestError(c, res.InvalidRequestPayloadCode, res.CodeMessage[res.InvalidRequestPayloadCode])
+		return
+	}
+
+	code := ac.AuthService.DelOtp(req.Email)
+	if code != res.SuccessCode {
+		res.BadRequestError(c, code, res.CodeMessage[code])
+		return
+	}
+	res.SuccessResponse(c, nil)
+}

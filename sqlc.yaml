@@ -1,0 +1,9 @@
+version: 2
+sql:
+  - engine: mysql 
+    queries: sqlc/queries
+    schema: sqlc/schema
+    gen:  
+      go:
+        package: database 
+        out: internal/database

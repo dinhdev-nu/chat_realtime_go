@@ -8,6 +8,7 @@ import (
 
 	"github.com/dinhdev-nu/realtime_auth_go/global"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/model"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/utils"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/utils/jwt"
 	res "github.com/dinhdev-nu/realtime_auth_go/pkg/response"
 	"github.com/gin-gonic/gin"
@@ -16,15 +17,14 @@ import (
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// get token from header
-		token := c.Request.Header.Get("Authentication")
+		bearerToken := c.Request.Header.Get("Authorization")
+		token := utils.GetToken(bearerToken)
 		userId := c.Request.Header.Get("Client-Id")
 
 		if token == "" || userId == "" {
-
 			token = c.GetString("token")
 			userId = c.GetString("user_id")
 			if token == "" || userId == "" {
-
 				res.UnauthorizedError(c)
 				c.Abort()
 				return
@@ -64,7 +64,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("uuidToken", claims.Subject)
+		c.Set("user", userInfo)
 		c.Next()
 	}
 }

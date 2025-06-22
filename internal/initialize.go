@@ -15,7 +15,8 @@ func Run() {
 	// Config
 	c.LoadConfig() // fmt.Print(global.Config.Server.Port) load config from environment
 	c.InitLogger() // g.Log.Info("Server is starting...")
-	c.InitMysql()
+	c.InitMysql()  // gorm
+	c.InitMysqlc() // sqlc
 	c.InitRedis()
 
 	// Init gin router

@@ -1,18 +1,19 @@
 package chat
 
 import (
+	c "github.com/dinhdev-nu/realtime_auth_go/internal/controller"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/utils/middleware/auth"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/websocket"
 	"github.com/gin-gonic/gin"
 )
 
 type ChatRouter struct {
-	// ChatController *c.ChatController
+	cc *c.ChatController
 }
 
-func NewChatRouter() *ChatRouter {
+func NewChatRouter(cc *c.ChatController) *ChatRouter {
 	return &ChatRouter{
-		// ChatController: cc,
+		cc: cc,
 	}
 }
 
@@ -23,12 +24,22 @@ func (cr *ChatRouter) InitRoutes(router *gin.RouterGroup) {
 
 	chatRouter := router.Group("chat")
 	{
-		// api
-		chatRouter.POST("/send-message", nil)      // ChatController.SendMessage)
-		chatRouter.POST("/get-messages", nil)      // ChatController.GetMessages)
-		chatRouter.POST("/get-conversations", nil) // ChatController.GetConversations)
-
 		// websocket endpoint
 		chatRouter.GET("/ws", websocket.HandleWebSocket(hub), auth.AuthMiddleware()) // upgrade http to websocket
+
+		// middleware
+		chatRouter.Use(auth.AuthMiddleware())
+		// init chat
+		chatRouter.GET("/init", cr.cc.InitChat) // Get info chat page
+
+		// api
+		chatRouter.GET("/get-messages/:room-id", cr.cc.GetMessages) // ChatController.GetMessages)
+
+		// room
+		chatRouter.GET("/get-room/:room_id", cr.cc.GetRoomChatById) // ChatController.GetRoomChatById)
+		chatRouter.POST("/create-room", cr.cc.CreateNewRoom)
+
+		// status
+		chatRouter.POST("/set-status", cr.cc.UpdateStatusMessages) // ChatController.UpdateStatus
 	}
 }

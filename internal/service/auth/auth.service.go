@@ -18,6 +18,7 @@ type IAuthService interface {
 	Register(email string) (map[string]string, int)
 	SendOtp(email string) int // int là mã lỗi
 	VeryfyOtp(email string, otp string) (string, int)
+	DelOtp(email string) int
 	SignUp(email string, password string) int
 	Login(email string, password string, loginIp string) (map[string]interface{}, int) // nên trả về 1 struct output
 	UpdatePassword(assword string) int
@@ -33,22 +34,26 @@ func NewAuthService(authRepo repo.IAuthRepo) IAuthService {
 }
 
 func (as *authService) Register(email string) (map[string]string, int) {
-
 	// hash email tránh lộ email để otp
 	emailHash := crypto.HashEmail(email)
 
 	// Check email exist
-	emailExist, err := as.repo.GetExistEmail(emailHash)
+	userInfo, err := as.repo.GetUserInfoByEmail(emailHash)
 	if err != nil {
-		fmt.Println("error check email exist" + err.Error())
-		return nil, response.ErrorCodeEmailExist
+		fmt.Println("error server " + err.Error())
+		return nil, response.ErrorCode
 	}
-	if emailExist {
+	if userInfo != nil && userInfo.UserState != 2 {
+		fmt.Println("email has exist")
 		return nil, response.ErrorCodeEmailExist
 	}
 
-	// create user info default
-	go as.repo.CreateUserRegis(emailHash, email)
+	if userInfo == nil {
+		err := as.repo.CreateUserRegis(emailHash, email)
+		if err != nil {
+			return nil, response.ErrorCreateCode
+		}
+	}
 
 	return map[string]string{
 		"email": email,
@@ -57,25 +62,33 @@ func (as *authService) Register(email string) (map[string]string, int) {
 
 func (as *authService) SendOtp(email string) int {
 	emailHash := crypto.HashEmail(email)
+
 	// check otp exist
 	if err := as.repo.GetOtp(emailHash); err != nil {
-		fmt.Println("error otp exist")
+		fmt.Println("error otp exist", err)
 		return response.ErrorCreateCode
 	}
 	// check email
-	userBase, err := as.repo.GetUser(emailHash)
+	userBase, err := as.repo.GetUserBase(emailHash)
 	if err != nil {
-		fmt.Println("error get user" + err.Error())
+		fmt.Println("error get user " + err.Error())
 		return response.ErrorUserNotExist
 	}
+	if userBase == nil {
+		fmt.Println("error user not exist")
+		return response.ErrorUserNotExist
+	}
+
 	// generaet opt
 	opt := random.CreateOtp()
+
 	// send otp
-	err = config.SendOTPEmailByTemplate(email, opt)
+	err = config.SendOTPEmailByTemplate(email, opt) // implement for 5s
 	if err != nil {
 		fmt.Println("error send otp" + err.Error())
 		return response.ErrorOtpFail
 	}
+
 	// save otp vào redis
 	data := map[string]interface{}{
 		"otp":        opt,
@@ -138,23 +151,25 @@ func (as *authService) VeryfyOtp(email string, otp string) (string, int) {
 func (as *authService) SignUp(email string, password string) int {
 	// hash email
 	emailHash := crypto.HashEmail(email)
-	// recheck email exist
-	emailExist, err := as.repo.GetExistEmail(emailHash)
-	if err != nil {
-		fmt.Println("error check email exist" + err.Error())
-		return response.ErrorCodeEmailExist
-	}
-	if !emailExist {
-		fmt.Println("email not exist")
-		return response.ErrorUserNotExist
-	}
+
+	// // recheck email exist
+	// emailExist, err := as.repo.GetExistEmail(emailHash)
+	// if err != nil {
+	// 	fmt.Println("error check email exist" + err.Error())
+	// 	return response.ErrorCodeEmailExist
+	// }
+	// if !emailExist {
+	// 	fmt.Println("email not exist")
+	// 	return response.ErrorUserNotExist
+	// }
+
 	// chech user state 1 is active
 	user, err := as.repo.GetUserInfoByEmail(emailHash)
 	if err != nil {
 		fmt.Println("error get user" + err.Error())
 		return response.ErrorUserNotExist
 	}
-	if user.UserState == 1 {
+	if user.UserState != 2 {
 		return response.SuccessCode
 	}
 
@@ -193,7 +208,7 @@ func (as *authService) Login(email string, password string, loginIp string) (map
 	// hash email
 	emailHash := crypto.HashEmail(email)
 	//Get user if exist
-	user, err := as.repo.GetUser(emailHash)
+	user, err := as.repo.GetUserBase(emailHash)
 	if err != nil {
 		fmt.Println("error get user" + err.Error())
 		return nil, response.ErrorUserNotExist
@@ -249,8 +264,7 @@ func (as *authService) Login(email string, password string, loginIp string) (map
 	}
 	return map[string]interface{}{
 		"token": token,
-		"id":    user.UserID,
-		"email": userInfo.UserEmail,
+		"user":  userInfo,
 	}, response.SuccessCode
 
 }
@@ -275,6 +289,25 @@ func (as *authService) Logout(email string, uuidToken string) int {
 	if err := as.repo.UpdateUserBase(hashEmail, data); err != nil {
 		fmt.Println("error update user logout time" + err.Error())
 		return response.ErrorUpdateCode
+	}
+
+	return response.SuccessCode
+}
+
+// delete otp and send otp => resend otp
+func (as *authService) DelOtp(email string) int {
+	hashEmail := crypto.HashEmail(email)
+
+	// delete otp in redis
+	err := as.repo.DelOtp(hashEmail)
+	if err != nil {
+		return response.ErrorDeleteCode
+	}
+
+	// delete otp in mysql
+	err = as.repo.DeleteOtpUser(hashEmail)
+	if err != nil {
+		return response.ErrorDeleteCode
 	}
 
 	return response.SuccessCode

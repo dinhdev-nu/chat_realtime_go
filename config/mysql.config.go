@@ -55,13 +55,13 @@ func setPoolSize() error {
 	return nil
 }
 
-func migrateTables() error {
+func migrateTables() error { // Go -> Mysql
 	return global.Mdb.AutoMigrate(
 		&model.GoDbUser{},
 	)
 }
 
-func generatePo() {
+func generatePo() { // Tạo các model từ database
 	g := gen.NewGenerator(gen.Config{
 		OutPath: "internal/model",
 		Mode:    gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface,

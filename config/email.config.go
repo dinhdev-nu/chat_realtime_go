@@ -7,6 +7,7 @@ import (
 	"net/smtp"
 
 	"github.com/dinhdev-nu/realtime_auth_go/global"
+	"github.com/jordan-wright/email"
 )
 
 func SendOTPEmailByText(toEmail, otp string) error {
@@ -77,4 +78,46 @@ func SendOTPEmailByTemplate(toEmail, otp string) error {
 
 	return smtp.SendMail(addr, auth, from, []string{toEmail}, msg)
 
+}
+
+// lib
+func SendEmail(toEmail, otp string) error {
+	data := map[string]interface{}{
+		"otp": otp,
+	}
+
+	tpl, err := template.ParseFiles("template-email/otp-register-email.html")
+	if err != nil {
+		fmt.Println("::::::::::::: Failed to parse template:", err)
+	}
+
+	var buffer bytes.Buffer
+	err = tpl.Execute(&buffer, data)
+	if err != nil {
+		fmt.Println("::::::::::::: Failed to execute template:", err)
+	}
+
+	// create the email
+	e := email.NewEmail()
+	e.From = global.Config.Mail.From
+	e.To = []string{toEmail}
+	e.Subject = "Your OTP Code"
+	e.HTML = buffer.Bytes()
+
+	err = e.Send(
+		fmt.Sprintf("%s:%s", global.Config.Mail.Host, global.Config.Mail.Port),
+		smtp.PlainAuth(
+			"",
+			global.Config.Mail.From,
+			global.Config.Mail.Password,
+			global.Config.Mail.Host,
+		),
+	)
+	if err != nil {
+		fmt.Println("::::::::::::: Failed to send email:", err)
+		return err
+	}
+
+	fmt.Println("::::::::::::: Email sent successfully")
+	return nil
 }

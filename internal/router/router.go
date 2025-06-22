@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/dinhdev-nu/realtime_auth_go/internal/router/auth"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/router/chat"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/router/user"
 	di "github.com/dinhdev-nu/realtime_auth_go/internal/wire"
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +19,8 @@ func newRouterMain() *RouterMain {
 	return &RouterMain{
 		Routers: []Router{
 			auth.NewAuthRouter(container.AuthController),
-			chat.NewChatRouter(),
+			chat.NewChatRouter(container.ChatController),
+			user.NewUserRouter(container.UserController),
 		},
 	}
 }

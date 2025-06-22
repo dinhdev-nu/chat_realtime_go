@@ -9,6 +9,8 @@
   - User Chat
   - Chatbot
 
+
+
 ## Purpose
 - **Learn Golang**: Understand and practice backend development using Golang.
 - **Modern Technologies**: Implement JWT, OAuth2, and realtime features.
@@ -23,7 +25,9 @@
 
 ### Run
 ```bash
-make run
+make run 
+# or
+go run ./cmd/cli/make/make.go
 # or
 go run ./cmd/server/main.go
 ```
@@ -36,10 +40,17 @@ go run ./cmd/server/main.go
     go get -u gorm.io/gorm
     go get -u gorm.io/gen
     ```
-    Generate MySQL -> PO struct in Go.
+    Generate MySQL Tables -> Models struct in Go.
 
 - **Chat**  
-  - Sqlc  
+  - Sqlc : convert sql query -> raw native query in go
+```bash
+go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+```
+  - Goose : mirgation file .sql to MySql 
+```bash
+go install github.com/pressly/goose/v3/cmd/goose@latest
+```
 
 ### Redis
 ```bash

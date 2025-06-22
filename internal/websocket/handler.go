@@ -1,8 +1,12 @@
 package websocket
 
 import (
+	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/dinhdev-nu/realtime_auth_go/global"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/utils"
 	"github.com/dinhdev-nu/realtime_auth_go/pkg/response"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -37,14 +41,38 @@ func HandleWebSocket(hub *Hub) gin.HandlerFunc {
 			return
 		}
 		Client := &Client{
-			UserID: userID,            // gán userID cho client,
-			Conn:   conn,              // gán kết nối cho client
-			Hub:    hub,               // gán hub cho client
-			Send:   make(chan []byte), // khởi tạo kênh gửi tin nhắn đến client
+			UserID: utils.StringToInt64(userID), // gán userID cho client,
+			Conn:   conn,                        // gán kết nối cho client
+			Hub:    hub,                         // gán hub cho client
+			Send:   make(chan []byte),           // khởi tạo kênh gửi tin nhắn đến client
 		}
 		hub.Register <- Client // thông báo hub có client mới kết nối
 
 		go Client.ReadMessage()  // chạy goroutine đọc tin nhắn từ client
 		go Client.WriteMessage() // chạy goroutine gửi tin nhắn đến client
 	}
+}
+
+func (hub *Hub) handlePresence(userId int64, status string) {
+	// save presence to cache
+	if status == "online" {
+		global.Rdb.Set(
+			&gin.Context{},
+			fmt.Sprintf("user:%d:presence", userId),
+			status,
+			time.Minute*2,
+		)
+	} else {
+		global.Rdb.Del(
+			&gin.Context{},
+			fmt.Sprintf("user:%d:presence", userId),
+		)
+		global.Rdb.Set(
+			&gin.Context{},
+			fmt.Sprintf("user:%d:last_seen", userId),
+			time.Now().Format("2006-01-02 15:04:05"),
+			0,
+		)
+	}
+
 }

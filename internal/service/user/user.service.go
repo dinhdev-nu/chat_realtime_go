@@ -1,9 +1,36 @@
 package service
 
-type IUserService interface{}
+import (
+	"github.com/dinhdev-nu/realtime_auth_go/internal/repo"
+)
 
-type userService struct{}
+type IUserService interface {
+	GetUserInfoByName(username string) (map[string]interface{}, error)
+	SearchUserByName(username string, userIdReqes int64) ([]map[string]interface{}, error)
+}
 
-func NewUserService() IUserService {
-	return &userService{}
+type userService struct {
+	repo repo.IUserRepo
+}
+
+func NewUserService(repo repo.IUserRepo) IUserService {
+	return &userService{
+		repo: repo,
+	}
+}
+
+func (us *userService) GetUserInfoByName(username string) (map[string]interface{}, error) {
+	userInfo, err := us.repo.GetUserInfoByName(username)
+	if err != nil {
+		return userInfo, err
+	}
+	return userInfo, nil
+}
+
+func (us *userService) SearchUserByName(username string, userIdRes int64) ([]map[string]interface{}, error) {
+	users, err := us.repo.SearchUserByName(username, userIdRes)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }

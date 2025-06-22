@@ -26,6 +26,7 @@ func (ar *AuthRouter) InitRoutes(router *gin.RouterGroup) {
 		authRouterGroupPublic.POST("/register", ar.AuthControler.Register)
 		authRouterGroupPublic.POST("/send-otp", ar.AuthControler.SendOtp)
 		authRouterGroupPublic.POST("/verify-otp", ar.AuthControler.VerifyOtp)
+		authRouterGroupPublic.DELETE("/del-otp", ar.AuthControler.DelOtp)
 		authRouterGroupPublic.POST("/sign-up", ar.AuthControler.SignUp)
 		authRouterGroupPublic.POST("/login", ar.AuthControler.Login)
 	}

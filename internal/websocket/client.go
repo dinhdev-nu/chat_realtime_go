@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/dinhdev-nu/realtime_auth_go/internal/input"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/repo"
+	service "github.com/dinhdev-nu/realtime_auth_go/internal/service/chat"
 	"github.com/gorilla/websocket"
 )
 
 type Client struct {
-	UserID string          // ID của người dùng
+	UserID int64           // ID của người dùng
 	Conn   *websocket.Conn // kết nối websocket
 	Send   chan []byte     // kênh gửi tin nhắn đến client
 	Hub    *Hub            // Hub kết nối của client
@@ -27,21 +30,48 @@ func (c *Client) ReadMessage() {
 		}
 
 		// Đưu tin nhắn đến broadcast phát cho tất cả client
-		var message Message
+		var message input.Message
 		if err := json.Unmarshal(msg, &message); err != nil { // Giải mã tin nhắn từ client
-
-			// case data là plain text // client go btoa data to byte
-			var rawData RawData
-			json.Unmarshal(msg, &rawData) // Giải mã tin nhắn từ client
-			message.SendID = rawData.SendID
-			message.ReceiverID = rawData.ReceiverID
-			message.ReceiverIDs = rawData.ReceiverIDs
-			message.Type = rawData.Type
-			message.Data = []byte(rawData.Data) // Chuyển đổi nội dung tin nhắn từ string sang []byte
+			fmt.Println("Error unmarshalling message: ", err) // In ra lỗi nếu có
+			newAck := NewAckMessage(
+				"error",
+				msg,
+				c.UserID,
+				0,
+			)
+			c.Hub.Ack <- newAck
+			continue // Tiếp tục vòng lặp nếu có lỗi
 		}
+		// Handle Message
+		// Check Event
+		switch message.Event {
+		case "message":
+			// Xử lý tin nhắn
+			fmt.Println("Received message: ", message) // In ra nội dung tin nhắn
+			data, err := service.NewChatService(repo.NewChatRepo(), repo.NewAuthRepo()).HandleSendMesage(message)
+			if err != nil {
+				fmt.Println("Error handling message: ", err) // In ra lỗi nếu có
+				newAck := NewAckMessage(
+					"error",
+					msg,
+					c.UserID,
+					0,
+				)
+				c.Hub.Ack <- newAck // Gửi tin nhắn ack lỗi đến client
 
-		message.SendID = c.UserID // Gán ID của người gửi vào tin nhắn
-		message.Data = msg        // Gán nội dung tin nhắn vào tin nhắn
+				continue // Tiếp tục vòng lặp nếu có lỗi
+			}
+			message.ID = uint64(data["message_id"].(int64)) // Lấy ID của tin nhắn từ dữ liệu trả về
+			var ack = NewAckMessage(
+				"success",
+				msg,
+				message.SendID,
+				message.ID,
+			)
+			c.Hub.Ack <- ack // Gửi tin nhắn ack thành công đến client
+		case "typing":
+			fmt.Println("User is typing...") // In ra thông báo người dùng đang gõ
+		}
 
 		c.Hub.Broadcast <- message
 	}
