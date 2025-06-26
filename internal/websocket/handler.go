@@ -56,18 +56,22 @@ func HandleWebSocket(hub *Hub) gin.HandlerFunc {
 func (hub *Hub) handlePresence(userId int64, status string) {
 	// save presence to cache
 	if status == "online" {
-		global.Rdb.Set(
+		go global.Rdb.Set(
 			&gin.Context{},
 			fmt.Sprintf("user:%d:presence", userId),
 			status,
-			time.Minute*2,
+			0,
+		)
+		go global.Rdb.Del(
+			&gin.Context{},
+			fmt.Sprintf("user:%d:last_seen", userId),
 		)
 	} else {
-		global.Rdb.Del(
+		go global.Rdb.Del(
 			&gin.Context{},
 			fmt.Sprintf("user:%d:presence", userId),
 		)
-		global.Rdb.Set(
+		go global.Rdb.Set(
 			&gin.Context{},
 			fmt.Sprintf("user:%d:last_seen", userId),
 			time.Now().Format("2006-01-02 15:04:05"),

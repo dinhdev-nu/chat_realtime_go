@@ -21,15 +21,15 @@ func NewContainer() *Container {
 	authService := sa.NewAuthService(authRepo)
 	authController := c.NewAuthController(authService)
 
-	// chat
-	chatRepo := repo.NewChatRepo()
-	chatService := sc.NewChatService(chatRepo, authRepo)
-	chatController := c.NewChatController(chatService)
-
 	// user
 	userRepo := repo.NewUserRepo()
 	userService := su.NewUserService(userRepo)
 	userController := c.NewUserController(userService)
+
+	// chat
+	chatRepo := repo.NewChatRepo()
+	chatService := sc.NewChatService(chatRepo, authRepo, userRepo)
+	chatController := c.NewChatController(chatService)
 
 	return &Container{
 		AuthController: authController,

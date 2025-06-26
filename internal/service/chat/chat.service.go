@@ -26,12 +26,14 @@ type IChatService interface {
 type chatService struct {
 	Arepo repo.IAuthRepo
 	Crepo repo.IChatRepo
+	Urepo repo.IUserRepo
 }
 
-func NewChatService(chatRepo repo.IChatRepo, authRepo repo.IAuthRepo) IChatService {
+func NewChatService(chatRepo repo.IChatRepo, authRepo repo.IAuthRepo, userRepo repo.IUserRepo) IChatService {
 	return &chatService{
 		Arepo: authRepo,
 		Crepo: chatRepo,
+		Urepo: userRepo,
 	}
 }
 
@@ -129,7 +131,20 @@ func (s *chatService) InitChat(userInfo *model.GoDbUserInfo) (map[string]interfa
 			})
 		}
 	}
+	// get user status
+	followers := make([]int64, 0)
+	for i, room := range rooms {
+		if room["info"] != nil {
+			userInfo := room["info"].(map[string]interface{})
+			status, _ := s.Urepo.GetStatusByUserId(userInfo["user_id"].(int64))
+			rooms[i]["info"].(map[string]interface{})["user_status"] = status
+
+			followers = append(followers, userInfo["user_id"].(int64))
+		}
+	}
+
 	res["rooms"] = rooms
+	res["followers"] = followers
 	res["socket_url"] = fmt.Sprintf("ws://%s:%s/v1/api/chat/ws?user_id=%d&token=",
 		global.Config.Server.Host, global.Config.Server.Port, userId)
 	return res, nil
