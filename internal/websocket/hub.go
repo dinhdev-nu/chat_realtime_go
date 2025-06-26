@@ -5,29 +5,32 @@ import (
 	"sync"
 
 	"github.com/dinhdev-nu/realtime_auth_go/internal/input"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/utils"
 )
 
 type Hub struct {
-	Clients map[int64]*Client // danh sách client đang kết nối
-	Rooms   map[int64][]int64
+	Clients   map[int64]*Client // danh sách client đang kết nối
+	Following map[int64][]int64
 
-	Register   chan *Client       // kênh thông báo client mới kết nối
-	Unregister chan *Client       // kênh thông báo client đã ngắt kết nối
-	Broadcast  chan input.Message // kênh gửi tin nhắn đến tất cả client
-	Ack        chan AckMessage    // kênh gửi tin nhắn ack đến client
-	mu         sync.Mutex         // Mutex để đồng bộ hóa truy cập đến danh sách client
+	Register    chan *Client       // kênh thông báo client mới kết nối
+	Unregister  chan *Client       // kênh thông báo client đã ngắt kết nối
+	Broadcast   chan input.Message // kênh gửi tin nhắn đến tất cả client
+	SubscribeTo chan input.Message // kênh để client đăng ký theo dõi người dùng khác
+	Ack         chan AckMessage    // kênh gửi tin nhắn ack đến client
+	mu          sync.Mutex         // Mutex để đồng bộ hóa truy cập đến danh sách client
 }
 
 // Tạo 1 Hub mới ( trung tâm điều phối )
 func NewHub() *Hub {
 	return &Hub{
-		Clients: make(map[int64]*Client),
-		Rooms:   make(map[int64][]int64),
+		Clients:   make(map[int64]*Client),
+		Following: make(map[int64][]int64),
 
-		Register:   make(chan *Client),
-		Unregister: make(chan *Client),
-		Ack:        make(chan AckMessage),
-		Broadcast:  make(chan input.Message),
+		Register:    make(chan *Client),
+		Unregister:  make(chan *Client),
+		SubscribeTo: make(chan input.Message), // kênh để client đăng ký theo dõi người dùng khác
+		Ack:         make(chan AckMessage),
+		Broadcast:   make(chan input.Message),
 	}
 }
 
@@ -39,17 +42,44 @@ func (h *Hub) Run() {
 			h.mu.Lock()
 			h.Clients[client.UserID] = client // Thêm client vào danh sách client connecting
 			h.mu.Unlock()
+			h.handlePresence(client.UserID, "online") // Gọi hàm handlePresence để lưu trạng thái online của client
 
 		case client := <-h.Unregister: // Case có client ngắt kết nối
+			if followers, ok := h.Following[client.UserID]; ok {
+				for _, id := range followers { // Duyệt qua tất cả người dùng đang theo dõi client
+					if follower, ok := h.Clients[id]; ok { // Kiểm tra client có trong danh sách không
+						follower.Send <- NewMessageResponse(client.UserID, id, "status", "offline") // Gửi tin nhắn thông báo client đã offline
+					}
+				}
+			}
 			h.mu.Lock()
 			if _, ok := h.Clients[client.UserID]; ok { // Kiểm tra client có trong danh sách không
-				delete(h.Clients, client.UserID) // Xóa client khỏi danh sách
-				delete(h.Rooms, client.UserID)   // Xóa client khỏi danh sách phòng chat
-				close(client.Send)               // Đóng kênh gửi tin nhắn của client
+				delete(h.Clients, client.UserID)   // Xóa client khỏi danh sách
+				delete(h.Following, client.UserID) // Xóa client khỏi danh sách phòng chat
+				close(client.Send)                 // Đóng kênh gửi tin nhắn của client
+			}
+			h.mu.Unlock()
+			h.handlePresence(client.UserID, "offline") // Gọi hàm handlePresence để lưu trạng thái offline của client
+		case followers := <-h.SubscribeTo:
+			h.mu.Lock()
+			if _, ok := h.Following[followers.SendID]; ok {
+				followersID := h.Following[followers.SendID]
+				for _, id := range followers.ReceiverIDs {
+					if !utils.Contains(followersID, id) {
+						h.Following[followers.SendID] = append(h.Following[followers.SendID], id)
+					}
+				}
+			} else {
+				h.Following[followers.SendID] = followers.ReceiverIDs
+				for _, id := range followers.ReceiverIDs {
+					if receiver, ok := h.Clients[id]; ok { // Kiểm tra client có trong danh sách không
+						receiver.Send <- NewMessageResponse(followers.SendID, id, "status", "online") // Gửi tin nhắn thông báo đăng ký thành công
+					}
+				}
 			}
 			h.mu.Unlock()
 		case ack := <-h.Ack: // Case có tin nhắn ack gửi đến client
-			if receiver, ok := h.Clients[ack.ReceiverID]; ok { 
+			if receiver, ok := h.Clients[ack.ReceiverID]; ok {
 				byteMsg, _ := json.Marshal(ack) // Chuyển đổi tin nhắn ack sang định dạng JSON
 				receiver.Send <- byteMsg        // Gửi tin nhắn ack đến client nhận
 			}

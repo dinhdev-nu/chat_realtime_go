@@ -47,8 +47,7 @@ func (c *Client) ReadMessage() {
 		switch message.Event {
 		case "message":
 			// Xử lý tin nhắn
-			fmt.Println("Received message: ", message) // In ra nội dung tin nhắn
-			data, err := service.NewChatService(repo.NewChatRepo(), repo.NewAuthRepo()).HandleSendMesage(message)
+			data, err := service.NewChatService(repo.NewChatRepo(), repo.NewAuthRepo(), repo.NewUserRepo()).HandleSendMesage(message)
 			if err != nil {
 				fmt.Println("Error handling message: ", err) // In ra lỗi nếu có
 				newAck := NewAckMessage(
@@ -69,8 +68,16 @@ func (c *Client) ReadMessage() {
 				message.ID,
 			)
 			c.Hub.Ack <- ack // Gửi tin nhắn ack thành công đến client
+		case "status":
+			message.ReceiverIDs = c.Hub.Following[message.SendID]         // Lấy danh sách người dùng theo dõi từ Hub
+			fmt.Printf("User %d %s ...", message.SendID, message.Content) // In ra thông báo trạng thái người dùng đã thay đổi
+		case "subscribe":
+			c.Hub.SubscribeTo <- message
+			continue
 		case "typing":
 			fmt.Println("User is typing...") // In ra thông báo người dùng đang gõ
+		case "read":
+			fmt.Println("User has read the message") // In ra thông báo người dùng đã đọc tin nhắn
 		}
 
 		c.Hub.Broadcast <- message

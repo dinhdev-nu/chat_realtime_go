@@ -32,5 +32,13 @@ func (us *userService) SearchUserByName(username string, userIdRes int64) ([]map
 	if err != nil {
 		return nil, err
 	}
+	if len(users) == 0 {
+		return users, nil
+	}
+	// Lấy trạng thái online/offline của từng user
+	for i, user := range users {
+		status, _ := us.repo.GetStatusByUserId(user["user_id"].(int64))
+		users[i]["user_status"] = status // Thêm trạng thái vào từng user
+	}
 	return users, nil
 }

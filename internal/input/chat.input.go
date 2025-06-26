@@ -5,7 +5,7 @@ import "time"
 // --- Message struct ---
 type Message struct {
 	ID          uint64    `json:"id"`            // ID của tin nhắn
-	RoomID      uint64    `json:"room_id"`       // ID của phòng chat (nếu có)
+	RoomID      string    `json:"room_id"`       // ID của phòng chat (nếu có)
 	SendID      int64     `json:"sender_id"`     // ID của người gửi
 	SendName    string    `json:"sender_name"`   // Tên của người gửi
 	SendAvatar  string    `json:"sender_avatar"` // Avatar của người gửi
