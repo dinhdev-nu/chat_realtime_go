@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/dinhdev-nu/realtime_auth_go/internal/input"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/dto"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/model"
 	service "github.com/dinhdev-nu/realtime_auth_go/internal/service/chat"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/utils"
@@ -67,7 +67,7 @@ func (cc *ChatController) GetRoomChatById(c *gin.Context) {
 }
 
 func (cc *ChatController) CreateNewRoom(c *gin.Context) {
-	data, err := body.GetPayLoadFromRequestBody[input.CreateRoomInput](c)
+	data, err := body.GetPayLoadFromRequestBody[dto.CreateRoomDTO](c)
 	if err != nil {
 		response.BadRequestError(c, response.InvalidRequestPayloadCode, err.Error())
 		return
@@ -82,7 +82,7 @@ func (cc *ChatController) CreateNewRoom(c *gin.Context) {
 }
 
 func (cc *ChatController) UpdateStatusMessages(c *gin.Context) {
-	data, err := body.GetPayLoadFromRequestBody[input.UpdateStatusInput](c)
+	data, err := body.GetPayLoadFromRequestBody[dto.UpdateStatusInput](c)
 	if err != nil {
 		response.BadRequestError(c, response.InvalidRequestPayloadCode, err.Error())
 		return

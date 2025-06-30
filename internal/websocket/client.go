@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/dinhdev-nu/realtime_auth_go/internal/input"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/dto"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/repo"
 	service "github.com/dinhdev-nu/realtime_auth_go/internal/service/chat"
 	"github.com/gorilla/websocket"
@@ -30,18 +30,14 @@ func (c *Client) ReadMessage() {
 		}
 
 		// Đưu tin nhắn đến broadcast phát cho tất cả client
-		var message input.Message
+		var message dto.OnMessage
 		if err := json.Unmarshal(msg, &message); err != nil { // Giải mã tin nhắn từ client
 			fmt.Println("Error unmarshalling message: ", err) // In ra lỗi nếu có
-			newAck := NewAckMessage(
-				"error",
-				msg,
-				c.UserID,
-				0,
-			)
+			newAck := NewAckMessage("error", msg, c.UserID, 0)
 			c.Hub.Ack <- newAck
 			continue // Tiếp tục vòng lặp nếu có lỗi
 		}
+
 		// Handle Message
 		// Check Event
 		switch message.Event {
@@ -50,27 +46,17 @@ func (c *Client) ReadMessage() {
 			data, err := service.NewChatService(repo.NewChatRepo(), repo.NewAuthRepo(), repo.NewUserRepo()).HandleSendMesage(message)
 			if err != nil {
 				fmt.Println("Error handling message: ", err) // In ra lỗi nếu có
-				newAck := NewAckMessage(
-					"error",
-					msg,
-					c.UserID,
-					0,
-				)
+				newAck := NewAckMessage("error", msg, c.UserID, 0)
 				c.Hub.Ack <- newAck // Gửi tin nhắn ack lỗi đến client
 
 				continue // Tiếp tục vòng lặp nếu có lỗi
 			}
-			message.ID = uint64(data["message_id"].(int64)) // Lấy ID của tin nhắn từ dữ liệu trả về
-			var ack = NewAckMessage(
-				"success",
-				msg,
-				message.SendID,
-				message.ID,
-			)
+			message.Message.ID = uint64(data.MessageID) // Lấy ID của tin nhắn từ dữ liệu trả về
+			var ack = NewAckMessage("success", msg, message.SendID, message.Message.ID)
 			c.Hub.Ack <- ack // Gửi tin nhắn ack thành công đến client
 		case "status":
-			message.ReceiverIDs = c.Hub.Following[message.SendID]         // Lấy danh sách người dùng theo dõi từ Hub
-			fmt.Printf("User %d %s ...", message.SendID, message.Content) // In ra thông báo trạng thái người dùng đã thay đổi
+			message.ReceiverIDs = c.Hub.Following[message.SendID]               // Lấy danh sách người dùng theo dõi từ Hub
+			fmt.Printf("User %d %s ...", message.SendID, message.Status.Status) // In ra thông báo trạng thái người dùng đã thay đổi
 		case "subscribe":
 			c.Hub.SubscribeTo <- message
 			continue

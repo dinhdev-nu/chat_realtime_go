@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/dinhdev-nu/realtime_auth_go/config"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/dto"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/repo"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/utils"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/utils/crypto"
@@ -15,12 +16,12 @@ import (
 )
 
 type IAuthService interface {
-	Register(email string) (map[string]string, int)
+	Register(email string) (dto.RegisterDTO, int)
 	SendOtp(email string) int // int là mã lỗi
-	VeryfyOtp(email string, otp string) (string, int)
+	VeryfyOtp(email string, otp string) int
 	DelOtp(email string) int
 	SignUp(email string, password string) int
-	Login(email string, password string, loginIp string) (map[string]interface{}, int) // nên trả về 1 struct output
+	Login(email string, password string, loginIp string) (dto.LoginOutput, int) // nên trả về 1 struct output
 	UpdatePassword(assword string) int
 	Logout(email string, uuidToken string) int //
 }
@@ -33,7 +34,7 @@ func NewAuthService(authRepo repo.IAuthRepo) IAuthService {
 	return &authService{repo: authRepo}
 }
 
-func (as *authService) Register(email string) (map[string]string, int) {
+func (as *authService) Register(email string) (dto.RegisterDTO, int) {
 	// hash email tránh lộ email để otp
 	emailHash := crypto.HashEmail(email)
 
@@ -41,22 +42,22 @@ func (as *authService) Register(email string) (map[string]string, int) {
 	userInfo, err := as.repo.GetUserInfoByEmail(emailHash)
 	if err != nil {
 		fmt.Println("error server " + err.Error())
-		return nil, response.ErrorCode
+		return dto.RegisterDTO{}, response.ErrorCode
 	}
 	if userInfo != nil && userInfo.UserState != 2 {
 		fmt.Println("email has exist")
-		return nil, response.ErrorCodeEmailExist
+		return dto.RegisterDTO{}, response.ErrorCodeEmailExist
 	}
 
 	if userInfo == nil {
 		err := as.repo.CreateUserRegis(emailHash, email)
 		if err != nil {
-			return nil, response.ErrorCreateCode
+			return dto.RegisterDTO{}, response.ErrorCreateCode
 		}
 	}
 
-	return map[string]string{
-		"email": email,
+	return dto.RegisterDTO{
+		Email: email,
 	}, response.SuccessCode
 }
 
@@ -64,7 +65,7 @@ func (as *authService) SendOtp(email string) int {
 	emailHash := crypto.HashEmail(email)
 
 	// check otp exist
-	if err := as.repo.GetOtp(emailHash); err != nil {
+	if _, err := as.repo.GetOtp(emailHash); err == nil {
 		fmt.Println("error otp exist", err)
 		return response.ErrorCreateCode
 	}
@@ -90,9 +91,9 @@ func (as *authService) SendOtp(email string) int {
 	}
 
 	// save otp vào redis
-	data := map[string]interface{}{
-		"otp":        opt,
-		"fail_count": 0,
+	data := dto.OtpValueRedisDTO{
+		OTP:       opt,
+		FailCount: 0,
 	}
 	err = as.repo.AddOtp(emailHash, data, 180) // 3 phút
 	if err != nil {
@@ -105,47 +106,47 @@ func (as *authService) SendOtp(email string) int {
 	return response.SuccessCode
 }
 
-func (as *authService) VeryfyOtp(email string, otp string) (string, int) {
+func (as *authService) VeryfyOtp(email string, otp string) int {
 	// get otp form redis
 	hashEmail := crypto.HashEmail(email)
-	data := as.repo.GetOtp(hashEmail)
-	if data == nil {
+	data, err := as.repo.GetOtp(hashEmail)
+	if err != nil {
 		fmt.Println("error get otp from redis")
-		return "", response.ErrorOtpNotExist
+		return response.ErrorOtpNotExist
 	}
 	// check otp fail count
-	if data["fail_count"].(float64) > 3 {
+	if data.FailCount > 3 {
 		err := as.repo.DelOtp(hashEmail)
 		if err != nil {
 			fmt.Println("error delete otp from redis")
-			return "", response.ErrorOtpFail
+			return response.ErrorOtpFail
 		}
 		fmt.Println("otp fail count > 3")
-		return "", response.ErrorOtpFail
+		return response.ErrorOtpFail
 	}
 
 	// compare otp
-	if data["otp"].(string) != otp {
+	if data.OTP != otp {
 		// increment fail count
 		err := as.repo.IncrementOtp(hashEmail, data)
 		if err != nil {
 			fmt.Println("error increment otp fail count" + err.Error())
-			return "", response.ErrorOtpFail
+			return response.ErrorOtpFail
 		}
 
-		fmt.Println("otp not match" + data["otp"].(string) + " != " + otp)
-		return "", response.ErrorOtpFail
+		fmt.Println("otp not match" + data.OTP + " != " + otp)
+		return response.ErrorOtpFail
 	}
 	// delete otp
-	err := as.repo.DelOtp(hashEmail)
+	err = as.repo.DelOtp(hashEmail)
 	if err != nil {
 		fmt.Println("error delete otp from redis")
-		return "", response.ErrorOtpFail
+		return response.ErrorOtpFail
 	}
 	// update otp in mysql
 	go as.repo.UpdateOtpIndb(hashEmail)
 
-	return hashEmail, response.SuccessCode
+	return response.SuccessCode
 }
 
 func (as *authService) SignUp(email string, password string) int {
@@ -204,33 +205,33 @@ func (as *authService) SignUp(email string, password string) int {
 	return response.SuccessCode
 }
 
-func (as *authService) Login(email string, password string, loginIp string) (map[string]interface{}, int) {
+func (as *authService) Login(email string, password string, loginIp string) (dto.LoginOutput, int) {
 	// hash email
 	emailHash := crypto.HashEmail(email)
 	//Get user if exist
 	user, err := as.repo.GetUserBase(emailHash)
 	if err != nil {
 		fmt.Println("error get user" + err.Error())
-		return nil, response.ErrorUserNotExist
+		return dto.LoginOutput{}, response.ErrorUserNotExist
 	}
 	userInfo, err := as.repo.GetUserInfoByID(user.UserID)
 	if err != nil {
 		fmt.Println("error get user info" + err.Error())
-		return nil, response.ErrorUserNotExist
+		return dto.LoginOutput{}, response.ErrorUserNotExist
 	}
 	switch userInfo.UserState {
 	case 0: // user state 0 is banned
 		fmt.Println("error user state is 0")
-		return nil, response.ErrorCode
+		return dto.LoginOutput{}, response.ErrorCode
 	case 2: // user state 2 is not active
 		fmt.Println("error user state is 2")
-		return nil, response.ErrorCode
+		return dto.LoginOutput{}, response.ErrorCode
 	}
 
 	// check password
 	if !crypto.VerifyPassword(password, user.UserPassword, user.UserSalt) {
 		fmt.Println("error password not match")
-		return nil, response.ErrorPasswordNotMatch
+		return dto.LoginOutput{}, response.ErrorPasswordNotMatch
 	}
 	// check 2 factor auth
 
@@ -240,31 +241,31 @@ func (as *authService) Login(email string, password string, loginIp string) (map
 	userData, err := json.Marshal(&userInfo)
 	if err != nil {
 		fmt.Println("error marshal user info" + err.Error())
-		return nil, response.ErrorUserNotExist
+		return dto.LoginOutput{}, response.ErrorUserNotExist
 	}
 	// save token to redis
 	err = as.repo.AddUserKey(uuidToken, userData)
 
 	if err != nil {
 		fmt.Println("error save token to redis" + err.Error())
-		return nil, response.ErrorCreateCode
+		return dto.LoginOutput{}, response.ErrorCreateCode
 	}
 
 	// create token
 	token, err := jwt.CreateToken(uuidToken)
 	if err != nil {
 		fmt.Println("error create token" + err.Error())
-		return nil, response.ErrorCreateCode
+		return dto.LoginOutput{}, response.ErrorCreateCode
 	}
 
 	// update user last login
 	err = as.repo.UpdateLoginUser(user.UserID, loginIp)
 	if err != nil {
-		return nil, response.ErrorUpdateLoginCode
+		return dto.LoginOutput{}, response.ErrorUpdateLoginCode
 	}
-	return map[string]interface{}{
-		"token": token,
-		"user":  userInfo,
+	return dto.LoginOutput{
+		Token: token,
+		User:  userInfo,
 	}, response.SuccessCode
 
 }

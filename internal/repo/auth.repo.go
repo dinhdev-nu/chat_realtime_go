@@ -7,15 +7,16 @@ import (
 	"time"
 
 	"github.com/dinhdev-nu/realtime_auth_go/global"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/dto"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/model"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type IAuthRepo interface {
-	AddOtp(email string, data map[string]interface{}, ttl int64) error
-	IncrementOtp(email string, value map[string]interface{}) error
-	GetOtp(email string) map[string]interface{}
+	AddOtp(email string, data dto.OtpValueRedisDTO, ttl int64) error
+	IncrementOtp(email string, value dto.OtpValueRedisDTO) error
+	GetOtp(email string) (dto.OtpValueRedisDTO, error)
 	DelOtp(email string) error        // delete otp from redis
 	DeleteFromRedis(key string) error // delete key from redis
 	AddUserKey(key string, userInfo []byte) error
@@ -243,14 +244,14 @@ func (ar *authRepo) AddUserKey(key string, userInfo []byte) error {
 	return nil
 }
 
-func (ar *authRepo) IncrementOtp(email string, value map[string]interface{}) error {
+func (ar *authRepo) IncrementOtp(email string, value dto.OtpValueRedisDTO) error {
 	key := "otp:" + email + ":usr"
 	// get ttl
 	ttl, err := global.Rdb.TTL(ar.ctx, key).Result()
 	if err != nil {
 		return err
 	}
-	value["fail_count"] = value["fail_count"].(float64) + 1
+	value.FailCount++
 	jsonData, err := json.Marshal(value)
 	if err != nil {
 		return err
@@ -258,7 +259,7 @@ func (ar *authRepo) IncrementOtp(email string, value map[string]interface{}) err
 	return global.Rdb.SetEx(ar.ctx, key, jsonData, ttl).Err()
 }
 
-func (ar *authRepo) AddOtp(email string, data map[string]interface{}, ttl int64) error {
+func (ar *authRepo) AddOtp(email string, data dto.OtpValueRedisDTO, ttl int64) error {
 	key := "otp:" + email + ":usr"
 	jsonData, err := json.Marshal(data)
 	if err != nil {
@@ -268,19 +269,18 @@ func (ar *authRepo) AddOtp(email string, data map[string]interface{}, ttl int64)
 	return global.Rdb.SetEx(ar.ctx, key, jsonData, time.Duration(ttl)*time.Second).Err()
 }
 
-func (ar *authRepo) GetOtp(email string) map[string]interface{} {
+func (ar *authRepo) GetOtp(email string) (dto.OtpValueRedisDTO, error) {
 	key := "otp:" + email + ":usr"
 	jsonData, err := global.Rdb.Get(ar.ctx, key).Result()
 	if err != nil || jsonData == "" {
-		return nil
+		return dto.OtpValueRedisDTO{}, errors.New("otp not found or empty")
 	}
-	var data map[string]interface{}
+	var data dto.OtpValueRedisDTO
 	err = json.Unmarshal([]byte(jsonData), &data)
 	if err != nil {
-		return nil
+		return dto.OtpValueRedisDTO{}, err
 	}
-
-	return data
+	return data, nil
 }
 
 // DelOtp delete otp from redis

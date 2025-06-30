@@ -6,21 +6,21 @@ import (
 	"fmt"
 
 	"github.com/dinhdev-nu/realtime_auth_go/global"
-	"github.com/dinhdev-nu/realtime_auth_go/internal/input"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/dto"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/model"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/repo"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/utils"
 )
 
 type IChatService interface {
-	InitChat(userInfo *model.GoDbUserInfo) (map[string]interface{}, error)
+	InitChat(userInfo *model.GoDbUserInfo) (dto.InitChatOutPut, error)
 	// messages
-	HandleSendMesage(msg input.Message) (map[string]interface{}, error)
-	GetMessagesFromRoom(roomId string, page string) (map[string]interface{}, error)
+	HandleSendMesage(msg dto.OnMessage) (dto.SaveMessageDTO, error)
+	GetMessagesFromRoom(roomId string, page string) (dto.GetMessagesFromRoomOutput, error)
 	// rooms
 	GetRoomChatById(id uint64) (map[string]interface{}, error)
-	CreateRoomChat(data *input.CreateRoomInput) (map[string]interface{}, error)
-	UpdateStatusMessages(data *input.UpdateStatusInput) error
+	CreateRoomChat(data *dto.CreateRoomDTO) (dto.CreateRoomDTO, error)
+	UpdateStatusMessages(data *dto.UpdateStatusInput) error
 }
 
 type chatService struct {
@@ -37,121 +37,118 @@ func NewChatService(chatRepo repo.IChatRepo, authRepo repo.IAuthRepo, userRepo r
 	}
 }
 
-func (s *chatService) HandleSendMesage(msg input.Message) (map[string]interface{}, error) {
+func (s *chatService) HandleSendMesage(msg dto.OnMessage) (dto.SaveMessageDTO, error) {
 	// check valid message
 
-	data := make(map[string]interface{})
-	data["message_room_id"] = msg.RoomID
-	data["message_content"] = msg.Content
-	data["message_sent_at"] = msg.SendAt
+	var data dto.SaveMessageDTO
+	data.MessageRoomID = uint64(msg.Message.RoomID)
+	data.MessageContent = msg.Message.Content
+	data.MessageSentAt = msg.Message.SendAt
 
 	// checck valid type
 	switch msg.Type {
 	case "single":
 
 		// Inset message to database
-		data["message_receiver_id"] = msg.ReceiverID
+		data.MessageReceiverID = uint64(msg.ReceiverID)
 
 		msgId, err := s.Crepo.SaveMessegeDirect(data)
 
 		if err != nil {
-			return nil, err
+			return dto.SaveMessageDTO{}, err
 		}
 
 		// Insert message type
 		err = s.Crepo.SaveMessageStatus(uint64(msgId), msg.ReceiverID)
 
 		if err != nil {
-			return nil, err
+			return dto.SaveMessageDTO{}, err
 		}
-		data["message_id"] = msgId
+		data.MessageID = msgId
 
 		fmt.Println("HandleSendMesage:10 ", msg)
 
 	case "multi":
 		// Insert message to database
-		data["message_sender_id"] = msg.SendID
+		data.MessageSenderID = uint64(msg.SendID)
 		msgId, err := s.Crepo.SaveMessegeGroup(data)
 		if err != nil {
-			return nil, err
+			return dto.SaveMessageDTO{}, err
 		}
-		data["message_id"] = msgId
+		data.MessageID = msgId
 	}
 
 	return data, nil
 }
 
 // init chat
-func (s *chatService) InitChat(userInfo *model.GoDbUserInfo) (map[string]interface{}, error) {
-	res := make(map[string]interface{})
-	res["user"] = userInfo
+func (s *chatService) InitChat(userInfo *model.GoDbUserInfo) (dto.InitChatOutPut, error) {
+	var res dto.InitChatOutPut
+	res.CurrentUser = userInfo
 
 	userId := userInfo.UserID
 
 	// Get user rooms
-	rooms := make([]map[string]interface{}, 0)
-	roomsId, err := s.Crepo.GetRoomsByUserId(userId)
+	data, err := s.Crepo.GetRoomsByUserId(userId)
 	if err != nil {
-		return nil, err
+		return dto.InitChatOutPut{}, err
 	}
 	// Get last message
-	for _, room := range roomsId {
+	for _, room := range data {
 		if room.MessageReceiverID == uint64(userId) {
 			// Get other user member info
 			anotherUser, err := s.Crepo.GetAnotherUserID(room.RoomID, userId)
 			if err != nil {
-				return nil, err
+				return dto.InitChatOutPut{}, err
 			}
 			// Get user info
 			user, err := s.Arepo.GetUserInfoByID(anotherUser)
 			if err != nil {
-				return nil, err
+				return dto.InitChatOutPut{}, err
 			}
-			rooms = append(rooms, map[string]interface{}{
-				"room": room,
-				"info": map[string]interface{}{
-					"user_id":     user.UserID,
-					"user_name":   user.UserNickname,
-					"user_avatar": user.UserAvatar,
+			res.Rooms = append(res.Rooms, dto.RoomInitChat{
+				RoomInfo: room,
+				Users: dto.InfoUserPrivateChat{
+					UserID:     user.UserID,
+					UserName:   user.UserNickname,
+					UserAvatar: user.UserAvatar,
 				},
 			})
 		} else {
 			// Get user info
 			user, err := s.Arepo.GetUserInfoByID(int64(room.MessageReceiverID))
 			if err != nil {
-				return nil, err
+				return dto.InitChatOutPut{}, err
 			}
-			rooms = append(rooms, map[string]interface{}{
-				"room": room,
-				"info": map[string]interface{}{
-					"user_id":     user.UserID,
-					"user_name":   user.UserNickname,
-					"user_avatar": user.UserAvatar,
+			res.Rooms = append(res.Rooms, dto.RoomInitChat{
+				RoomInfo: room,
+				Users: dto.InfoUserPrivateChat{
+					UserID:     user.UserID,
+					UserName:   user.UserNickname,
+					UserAvatar: user.UserAvatar,
 				},
 			})
 		}
 	}
 	// get user status
-	followers := make([]int64, 0)
-	for i, room := range rooms {
-		if room["info"] != nil {
-			userInfo := room["info"].(map[string]interface{})
-			status, _ := s.Urepo.GetStatusByUserId(userInfo["user_id"].(int64))
-			rooms[i]["info"].(map[string]interface{})["user_status"] = status
+	for i, room := range res.Rooms {
+		if !room.RoomInfo.RoomIsGroup {
+			status, _ := s.Urepo.GetStatusByUserId(room.Users.UserID)
+			res.Rooms[i].Users.UserStatus = status
 
-			followers = append(followers, userInfo["user_id"].(int64))
+			res.Followers = append(res.Followers, room.Users.UserID)
+		} else {
+			res.Rooms[i].Users.UserStatus = "offline"
 		}
 	}
 
-	res["rooms"] = rooms
-	res["followers"] = followers
-	res["socket_url"] = fmt.Sprintf("ws://%s:%s/v1/api/chat/ws?user_id=%d&token=",
+	res.SocketUrl = fmt.Sprintf("ws://%s:%s/v1/api/chat/ws?user_id=%d&token=",
 		global.Config.Server.Host, global.Config.Server.Port, userId)
 	return res, nil
 }
 
 // messages
-func (s *chatService) GetMessagesFromRoom(roomId string, page string) (map[string]interface{}, error) {
+func (s *chatService) GetMessagesFromRoom(roomId string, page string) (dto.GetMessagesFromRoomOutput, error) {
 	if page == "" {
 		page = "1" // Default to page 1 if not provided
 	}
@@ -159,23 +156,22 @@ func (s *chatService) GetMessagesFromRoom(roomId string, page string) (map[strin
 
 	room, err := s.Crepo.GetRoomById(roomIdUint)
 	if err != nil {
-		return nil, err
+		return dto.GetMessagesFromRoomOutput{}, err
 	}
-	var result = map[string]interface{}{
-		"room_id": room.RoomID,
-	}
+	var result dto.GetMessagesFromRoomOutput
+	result.RoomIsGroup = room.RoomIsGroup
 	if !room.RoomIsGroup {
 		messegers, err := s.Crepo.GetMessagesFromRoom(roomIdUint, utils.StringToInt64(page))
 		if err != nil {
-			return nil, err
+			return dto.GetMessagesFromRoomOutput{}, err
 		}
-		result["messages"] = messegers
+		result.MessagesDriect = messegers
 	} else {
 		messegers, err := s.Crepo.GetMessagesGruopFromRoom(roomIdUint, utils.StringToInt64(page))
 		if err != nil {
-			return nil, err
+			return dto.GetMessagesFromRoomOutput{}, err
 		}
-		result["messages"] = messegers
+		result.MessagesGroup = messegers
 	}
 
 	return result, nil // Placeholder for message retrieval logic
@@ -194,49 +190,37 @@ func (s *chatService) GetRoomChatById(id uint64) (map[string]interface{}, error)
 	}, nil
 }
 
-func (s *chatService) CreateRoomChat(data *input.CreateRoomInput) (map[string]interface{}, error) {
+func (s *chatService) CreateRoomChat(data *dto.CreateRoomDTO) (dto.CreateRoomDTO, error) {
 	// Check if room already exists
 	room, err := s.Crepo.GetRoomByName(data.RoomName)
 	if !errors.Is(err, sql.ErrNoRows) {
-		return nil, err
+		return dto.CreateRoomDTO{}, err
 	}
 
 	if room.RoomID > 0 {
-		return map[string]interface{}{
-			"room_id":  room.RoomID,
-			"is_group": data.RoomIsGroup,
+		return dto.CreateRoomDTO{
+			RoomID:      room.RoomID,
+			RoomName:    data.RoomName,
+			RoomIsGroup: data.RoomIsGroup,
+			RoomMembers: data.RoomMembers,
 		}, nil
 	}
 
-	// Prepare payload for creating a new room
-	payload := map[string]interface{}{
-		"room_name":      data.RoomName,
-		"room_create_by": data.RoomCreateBy,
-		"room_is_group":  data.RoomIsGroup,
-	}
-
-	var id int64
-	id, err = s.Crepo.CreateRoom(payload)
+	err = s.Crepo.CreateRoom(data)
 	if err != nil {
-		return nil, err
+		return dto.CreateRoomDTO{}, err
 	}
 	// Create room members
-	err = s.Crepo.AddMembersToRoom(id, data.RoomMembers)
+	err = s.Crepo.AddMembersToRoom(data.RoomID, data.RoomMembers)
 	if err != nil {
-		return nil, err
+		return dto.CreateRoomDTO{}, err
 	}
 
-	return map[string]interface{}{
-		"room_id":  id,
-		"is_group": data.RoomIsGroup,
-	}, nil
+	return *data, nil
 }
 
-func (s *chatService) UpdateStatusMessages(data *input.UpdateStatusInput) error {
-	err := s.Crepo.UpdateMessageStatus(
-		data.RoomID,
-		data.UserId,
-	)
+func (s *chatService) UpdateStatusMessages(data *dto.UpdateStatusInput) error {
+	err := s.Crepo.UpdateMessageStatus(data)
 	if err != nil {
 		return err
 	}

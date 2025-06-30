@@ -3,7 +3,7 @@ package websocket
 import (
 	"encoding/json"
 
-	"github.com/dinhdev-nu/realtime_auth_go/internal/input"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/dto"
 )
 
 type AckMessage struct {
@@ -26,11 +26,14 @@ func NewAckMessage(status string, content []byte, receiverId int64, msgId uint64
 
 func NewMessageResponse(sender_id int64, reseiver_id int64, event string, content string) []byte {
 	data, _ := json.Marshal(
-		input.Message{
-			Event:      event,
-			SendID:     sender_id,
-			ReceiverID: reseiver_id,
-			Content:    content,
+		dto.OnMessage{
+			Event:       event,
+			Type:        "single",
+			SendID:      sender_id,
+			ReceiverIDs: []int64{reseiver_id},
+			Status: dto.StatusMessage{
+				Status: content,
+			},
 		})
 	return data
 }

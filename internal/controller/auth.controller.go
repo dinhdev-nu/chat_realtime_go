@@ -1,9 +1,7 @@
 package controller
 
 import (
-	"fmt"
-
-	"github.com/dinhdev-nu/realtime_auth_go/internal/input"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/dto"
 	service "github.com/dinhdev-nu/realtime_auth_go/internal/service/auth"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/utils/body"
 	res "github.com/dinhdev-nu/realtime_auth_go/pkg/response"
@@ -20,7 +18,7 @@ func NewAuthController(authService service.IAuthService) *AuthController {
 	}
 }
 func (ac *AuthController) Register(c *gin.Context) {
-	req, err := body.GetPayLoadFromRequestBody[input.EmailInput](c)
+	req, err := body.GetPayLoadFromRequestBody[dto.RegisterDTO](c)
 	if err != nil {
 		res.BadRequestError(c, res.InvalidRequestPayloadCode, res.CodeMessage[res.InvalidRequestPayloadCode])
 		return
@@ -36,7 +34,7 @@ func (ac *AuthController) Register(c *gin.Context) {
 }
 
 func (ac *AuthController) SendOtp(c *gin.Context) {
-	req, err := body.GetPayLoadFromRequestBody[input.EmailInput](c)
+	req, err := body.GetPayLoadFromRequestBody[dto.SendOtpDTO](c)
 	if err != nil {
 		res.BadRequestError(c, res.InvalidRequestPayloadCode, res.CodeMessage[res.InvalidRequestPayloadCode])
 		return
@@ -50,21 +48,21 @@ func (ac *AuthController) SendOtp(c *gin.Context) {
 }
 
 func (ac *AuthController) VerifyOtp(c *gin.Context) {
-	req, err := body.GetPayLoadFromRequestBody[input.OtpInput](c)
+	req, err := body.GetPayLoadFromRequestBody[dto.VerifyOtpDTO](c)
 	if err != nil {
 		res.BadRequestError(c, res.InvalidRequestPayloadCode, res.CodeMessage[res.InvalidRequestPayloadCode])
 		return
 	}
-	email, code := ac.AuthService.VeryfyOtp(req.Email, req.Otp)
+	code := ac.AuthService.VeryfyOtp(req.Email, req.Otp)
 	if code != res.SuccessCode {
 		res.BadRequestError(c, code, res.CodeMessage[code])
 		return
 	}
-	res.SuccessResponse(c, map[string]string{"keyPass": email})
+	res.SuccessResponse(c, nil)
 }
 
 func (ac *AuthController) SignUp(c *gin.Context) {
-	req, err := body.GetPayLoadFromRequestBody[input.SignUpInput](c)
+	req, err := body.GetPayLoadFromRequestBody[dto.SignUpInput](c)
 	if err != nil {
 		res.BadRequestError(c, res.InvalidRequestPayloadCode, res.CodeMessage[res.InvalidRequestPayloadCode])
 		return
@@ -78,7 +76,7 @@ func (ac *AuthController) SignUp(c *gin.Context) {
 }
 
 func (ac *AuthController) Login(c *gin.Context) {
-	req, err := body.GetPayLoadFromRequestBody[input.LoginInput](c)
+	req, err := body.GetPayLoadFromRequestBody[dto.LoginInput](c)
 	if err != nil {
 		res.BadRequestError(c, res.InvalidRequestPayloadCode, res.CodeMessage[res.InvalidRequestPayloadCode])
 		return
@@ -93,13 +91,12 @@ func (ac *AuthController) Login(c *gin.Context) {
 }
 
 func (ac *AuthController) Logout(c *gin.Context) {
-	req, err := body.GetPayLoadFromRequestBody[input.LogoutInput](c)
+	req, err := body.GetPayLoadFromRequestBody[dto.LogoutInput](c)
 	if err != nil {
 		res.BadRequestError(c, res.InvalidRequestPayloadCode, res.CodeMessage[res.InvalidRequestPayloadCode])
 		return
 	}
 	req.UuidToken = c.GetString("uuidToken")
-	fmt.Println("uuidToken", req.UuidToken)
 	code := ac.AuthService.Logout(req.Email, req.UuidToken)
 	if code != res.SuccessCode {
 		res.BadRequestError(c, code, res.CodeMessage[code])
@@ -110,7 +107,7 @@ func (ac *AuthController) Logout(c *gin.Context) {
 }
 
 func (ac *AuthController) DelOtp(c *gin.Context) {
-	req, err := body.GetPayLoadFromRequestBody[input.EmailInput](c)
+	req, err := body.GetPayLoadFromRequestBody[dto.EmailInput](c)
 	if err != nil {
 		res.BadRequestError(c, res.InvalidRequestPayloadCode, res.CodeMessage[res.InvalidRequestPayloadCode])
 		return

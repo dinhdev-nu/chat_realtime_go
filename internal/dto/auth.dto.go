@@ -1,17 +1,18 @@
-package input
+package dto
 
-type EmailInput struct {
+import "github.com/dinhdev-nu/realtime_auth_go/internal/model"
+
+type RegisterDTO struct {
 	Email string `json:"email" binding:"required,email"`
 }
 
-type OtpInput struct {
+type SendOtpDTO struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
+type VerifyOtpDTO struct {
 	Email string `json:"email" binding:"required,email"`
 	Otp   string `json:"otp" binding:"required"`
-}
-
-type SendOtpInput struct {
-	Email   string `json:"email" binding:"required,email"`
-	Purpose int    `json:"purpose" binding:"required"`
 }
 
 type SignUpInput struct {
@@ -25,7 +26,21 @@ type LoginInput struct {
 	LoginIp  string `json:"login_ip"`
 }
 
+type LoginOutput struct {
+	Token string              `json:"token"`
+	User  *model.GoDbUserInfo `json:"user"`
+}
+
 type LogoutInput struct {
 	Email     string `json:"email" binding:"required,email"`
 	UuidToken string `json:"uuid_token"`
+}
+
+type EmailInput struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
+type OtpValueRedisDTO struct {
+	OTP       string `json:"otp"`
+	FailCount int    `json:"fail_count"`
 }

@@ -2,10 +2,10 @@ package repo
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/dinhdev-nu/realtime_auth_go/global"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/database"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/dto"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,17 +13,17 @@ type IChatRepo interface {
 	GetRoomsByUserId(userId int64) ([]database.GetPrivateRoomsByUserIdRow, error)
 	GetRoomById(id uint64) (database.GoDbChatRoom, error)
 	GetRoomByName(name string) (database.GetRoomByNameRow, error)
-	CreateRoom(data map[string]interface{}) (int64, error)
-	AddMembersToRoom(roomId int64, users []int64) error
+	CreateRoom(data *dto.CreateRoomDTO) error
+	AddMembersToRoom(roomId uint64, users []uint64) error
 	GetAnotherUserID(roomId uint64, userId int64) (int64, error)
 
 	GetMessagesFromRoom(roomId uint64, page int64) ([]database.GetMessagesDirectByRoomIdRow, error)
 	GetMessagesGruopFromRoom(roomId uint64, page int64) ([]database.GoDbChatMessagesGroup, error)
-	SaveMessegeDirect(data map[string]interface{}) (int64, error)
-	SaveMessegeGroup(data map[string]interface{}) (int64, error)
+	SaveMessegeDirect(data dto.SaveMessageDTO) (int64, error)
+	SaveMessegeGroup(data dto.SaveMessageDTO) (int64, error)
 	SaveMessageStatus(msgId uint64, userId int64) error
 
-	UpdateMessageStatus(msgId uint64, userId int64) error
+	UpdateMessageStatus(data *dto.UpdateStatusInput) error
 }
 
 type chatRepo struct {
@@ -39,10 +39,10 @@ func NewChatRepo() IChatRepo {
 	}
 }
 
-func (r *chatRepo) UpdateMessageStatus(msgId uint64, userId int64) error {
+func (r *chatRepo) UpdateMessageStatus(data *dto.UpdateStatusInput) error {
 	err := r.sqlc.UpdateMessageStatus(r.ctx, database.UpdateMessageStatusParams{
-		RoomID:            msgId,
-		MessageReceiverID: uint64(userId),
+		RoomID:            data.RoomID,
+		MessageReceiverID: data.UserId,
 	})
 	if err != nil {
 		return err
@@ -61,16 +61,16 @@ func (r *chatRepo) SaveMessageStatus(msgId uint64, userId int64) error {
 	return nil
 }
 
-func (r *chatRepo) SaveMessegeDirect(data map[string]interface{}) (int64, error) {
+func (r *chatRepo) SaveMessegeDirect(data dto.SaveMessageDTO) (int64, error) {
 	message := database.SaveMessageDirectParams{
-		MessageRoomID:     data["message_room_id"].(uint64),
-		MessageReceiverID: uint64(data["message_receiver_id"].(int64)),
-		MessageContent:    data["message_content"].(string),
+		MessageRoomID:     data.MessageRoomID,
+		MessageReceiverID: uint64(data.MessageReceiverID),
+		MessageContent:    data.MessageContent,
 		MessageType: database.NullGoDbChatMessagesDirectMessageType{
 			Valid:                             true,
 			GoDbChatMessagesDirectMessageType: database.GoDbChatMessagesDirectMessageTypeText,
 		},
-		MessageSentAt: data["message_sent_at"].(time.Time),
+		MessageSentAt: data.MessageSentAt,
 	}
 	res, err := r.sqlc.SaveMessageDirect(r.ctx, message)
 	if err != nil {
@@ -80,16 +80,16 @@ func (r *chatRepo) SaveMessegeDirect(data map[string]interface{}) (int64, error)
 	return id, nil
 }
 
-func (r *chatRepo) SaveMessegeGroup(data map[string]interface{}) (int64, error) {
+func (r *chatRepo) SaveMessegeGroup(data dto.SaveMessageDTO) (int64, error) {
 	message := database.SaveMessageGroupParams{
-		MessageRoomID:   data["message_room_id"].(uint64),
-		MessageSenderID: uint64(data["message_sender_id"].(int64)),
-		MessageContent:  data["message_content"].(string),
+		MessageRoomID:   data.MessageRoomID,
+		MessageSenderID: data.MessageSenderID,
+		MessageContent:  data.MessageContent,
 		MessageType: database.NullGoDbChatMessagesGroupMessageType{
 			Valid:                            true,
 			GoDbChatMessagesGroupMessageType: database.GoDbChatMessagesGroupMessageTypeText,
 		},
-		MessageSentAt: data["message_sent_at"].(time.Time),
+		MessageSentAt: data.MessageSentAt,
 	}
 	res, err := r.sqlc.SaveMessageGroup(r.ctx, message)
 	if err != nil {
@@ -165,25 +165,26 @@ func (r *chatRepo) GetRoomByName(name string) (database.GetRoomByNameRow, error)
 	return room, nil
 }
 
-func (r *chatRepo) CreateRoom(data map[string]interface{}) (int64, error) {
+func (r *chatRepo) CreateRoom(data *dto.CreateRoomDTO) error {
 	res, err := r.sqlc.CreateRoom(r.ctx, database.CreateRoomParams{
-		RoomName:      NullString(data["room_name"].(string)),
-		RoomCreatedBy: NullInt64(data["room_create_by"].(int64)),
-		RoomIsGroup:   data["room_is_group"].(bool),
+		RoomName:      NullString(data.RoomName),
+		RoomCreatedBy: NullInt64(data.RoomCreateBy),
+		RoomIsGroup:   data.RoomIsGroup,
 	})
 	if err != nil {
 		fmt.Println("Error creating room:", err)
-		return 0, err
+		return err
 	}
 	id, _ := res.LastInsertId()
-	return id, nil
+	data.RoomID = uint64(id)
+	return nil
 }
 
-func (r *chatRepo) AddMembersToRoom(roomId int64, users []int64) error {
+func (r *chatRepo) AddMembersToRoom(roomId uint64, users []uint64) error {
 	for _, user := range users {
 		err := r.sqlc.InsetMemberToRoom(r.ctx, database.InsetMemberToRoomParams{
-			RoomID:       uint64(roomId),
-			MemberUserID: uint64(user),
+			RoomID:       roomId,
+			MemberUserID: user,
 		})
 		if err != nil {
 			return err

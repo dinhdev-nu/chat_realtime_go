@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/dinhdev-nu/realtime_auth_go/internal/input"
+	"github.com/dinhdev-nu/realtime_auth_go/internal/dto"
 	"github.com/dinhdev-nu/realtime_auth_go/internal/utils"
 )
 
@@ -14,8 +14,8 @@ type Hub struct {
 
 	Register    chan *Client       // kênh thông báo client mới kết nối
 	Unregister  chan *Client       // kênh thông báo client đã ngắt kết nối
-	Broadcast   chan input.Message // kênh gửi tin nhắn đến tất cả client
-	SubscribeTo chan input.Message // kênh để client đăng ký theo dõi người dùng khác
+	Broadcast   chan dto.OnMessage // kênh gửi tin nhắn đến tất cả client
+	SubscribeTo chan dto.OnMessage // kênh để client đăng ký theo dõi người dùng khác
 	Ack         chan AckMessage    // kênh gửi tin nhắn ack đến client
 	mu          sync.Mutex         // Mutex để đồng bộ hóa truy cập đến danh sách client
 }
@@ -28,9 +28,9 @@ func NewHub() *Hub {
 
 		Register:    make(chan *Client),
 		Unregister:  make(chan *Client),
-		SubscribeTo: make(chan input.Message), // kênh để client đăng ký theo dõi người dùng khác
+		SubscribeTo: make(chan dto.OnMessage), // kênh để client đăng ký theo dõi người dùng khác
 		Ack:         make(chan AckMessage),
-		Broadcast:   make(chan input.Message),
+		Broadcast:   make(chan dto.OnMessage),
 	}
 }
 
@@ -90,7 +90,7 @@ func (h *Hub) Run() {
 				if receiver, ok := h.Clients[msg.ReceiverID]; ok { // Kiểm tra client có trong danh sách không
 					receiver.Send <- byteMsg // Gửi tin nhắn đến client nhận
 				}
-			case "multi": // Nếu là tin nhắn nhóm (1 - n chat)
+			case "group": // Nếu là tin nhắn nhóm (1 - n chat)
 				for _, id := range msg.ReceiverIDs { // Duyệt qua tất cả client trong danh sách
 					if receiver, ok := h.Clients[id]; ok { // Kiểm tra client có trong danh sách không
 						receiver.Send <- byteMsg // Gửi tin nhắn đến client nhận
