@@ -8,11 +8,10 @@ package database
 import (
 	"context"
 	"database/sql"
-	"time"
 )
 
 const getAnotherPrivateMenberByRoomId = `-- name: GetAnotherPrivateMenberByRoomId :one
-SELECT member_user_id FROM go_db_chat_room_members 
+SELECT member_user_id, member_last_seen FROM go_db_chat_room_members 
 WHERE room_id = ? AND member_user_id != ?
 `
 
@@ -21,94 +20,50 @@ type GetAnotherPrivateMenberByRoomIdParams struct {
 	MemberUserID uint64
 }
 
-func (q *Queries) GetAnotherPrivateMenberByRoomId(ctx context.Context, arg GetAnotherPrivateMenberByRoomIdParams) (uint64, error) {
+type GetAnotherPrivateMenberByRoomIdRow struct {
+	MemberUserID   uint64
+	MemberLastSeen sql.NullInt64
+}
+
+func (q *Queries) GetAnotherPrivateMenberByRoomId(ctx context.Context, arg GetAnotherPrivateMenberByRoomIdParams) (GetAnotherPrivateMenberByRoomIdRow, error) {
 	row := q.db.QueryRowContext(ctx, getAnotherPrivateMenberByRoomId, arg.RoomID, arg.MemberUserID)
-	var member_user_id uint64
-	err := row.Scan(&member_user_id)
-	return member_user_id, err
-}
-
-const getPrivateRoomsByUserId = `-- name: GetPrivateRoomsByUserId :many
-SELECT 
-  m.room_id, 
-  r.room_is_group, 
-  d.message_receiver_id, 
-  d.message_content, 
-  d.message_type,
-  d.message_id,
-  d.message_sent_at,
-  s.message_is_read
-FROM go_db_chat_room_members m
-JOIN go_db_chat_rooms r 
-  ON m.room_id = r.room_id
-LEFT JOIN (
-    SELECT message_id, message_room_id, message_receiver_id, message_content, message_type, message_sent_at FROM go_db_chat_messages_direct d1
-    WHERE (d1.message_sent_at) IN (
-        SELECT MAX(message_sent_at)
-        FROM go_db_chat_messages_direct
-        GROUP BY message_room_id
-    ) 
-) d ON m.room_id = d.message_room_id
-LEFT JOIN go_db_chat_message_status s ON d.message_id = s.message_id
-WHERE 
-  m.member_user_id = ?
-  AND r.room_is_group = 0
-`
-
-type GetPrivateRoomsByUserIdRow struct {
-	RoomID            uint64
-	RoomIsGroup       bool
-	MessageReceiverID uint64
-	MessageContent    string
-	MessageType       NullGoDbChatMessagesDirectMessageType
-	MessageID         uint64
-	MessageSentAt     time.Time
-	MessageIsRead     sql.NullBool
-}
-
-func (q *Queries) GetPrivateRoomsByUserId(ctx context.Context, memberUserID uint64) ([]GetPrivateRoomsByUserIdRow, error) {
-	rows, err := q.db.QueryContext(ctx, getPrivateRoomsByUserId, memberUserID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetPrivateRoomsByUserIdRow
-	for rows.Next() {
-		var i GetPrivateRoomsByUserIdRow
-		if err := rows.Scan(
-			&i.RoomID,
-			&i.RoomIsGroup,
-			&i.MessageReceiverID,
-			&i.MessageContent,
-			&i.MessageType,
-			&i.MessageID,
-			&i.MessageSentAt,
-			&i.MessageIsRead,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+	var i GetAnotherPrivateMenberByRoomIdRow
+	err := row.Scan(&i.MemberUserID, &i.MemberLastSeen)
+	return i, err
 }
 
 const insetMemberToRoom = `-- name: InsetMemberToRoom :exec
-INSERT INTO go_db_chat_room_members (room_id, member_user_id) 
-VALUES (?, ?)
+INSERT INTO go_db_chat_room_members (
+  room_id, member_user_id,
+  member_role
+) 
+VALUES (?, ?, ?)
 `
 
 type InsetMemberToRoomParams struct {
 	RoomID       uint64
 	MemberUserID uint64
+	MemberRole   string
 }
 
 func (q *Queries) InsetMemberToRoom(ctx context.Context, arg InsetMemberToRoomParams) error {
-	_, err := q.db.ExecContext(ctx, insetMemberToRoom, arg.RoomID, arg.MemberUserID)
+	_, err := q.db.ExecContext(ctx, insetMemberToRoom, arg.RoomID, arg.MemberUserID, arg.MemberRole)
+	return err
+}
+
+const updateMemberLastSeen = `-- name: UpdateMemberLastSeen :exec
+UPDATE go_db_chat_room_members
+SET member_last_seen = ?
+WHERE room_id = ? AND member_user_id = ?
+`
+
+type UpdateMemberLastSeenParams struct {
+	MemberLastSeen sql.NullInt64
+	RoomID         uint64
+	MemberUserID   uint64
+}
+
+func (q *Queries) UpdateMemberLastSeen(ctx context.Context, arg UpdateMemberLastSeenParams) error {
+	_, err := q.db.ExecContext(ctx, updateMemberLastSeen, arg.MemberLastSeen, arg.RoomID, arg.MemberUserID)
 	return err
 }

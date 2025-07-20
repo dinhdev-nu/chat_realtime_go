@@ -8,24 +8,210 @@ package database
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 const createRoom = `-- name: CreateRoom :execresult
-INSERT INTO ` + "`" + `go_db_chat_rooms` + "`" + ` (` + "`" + `room_name` + "`" + `, ` + "`" + `room_is_group` + "`" + `, ` + "`" + `room_created_by` + "`" + `) VALUES (?, ?, ?)
+INSERT INTO ` + "`" + `go_db_chat_rooms` + "`" + ` (
+    ` + "`" + `room_name` + "`" + ` , ` + "`" + `room_description` + "`" + `, ` + "`" + `room_avatar` + "`" + `, 
+    ` + "`" + `room_is_group` + "`" + `, ` + "`" + `room_created_by` + "`" + `
+) VALUES (?, ?, ?, ? , ?)
 `
 
 type CreateRoomParams struct {
-	RoomName      sql.NullString
-	RoomIsGroup   bool
-	RoomCreatedBy sql.NullInt64
+	RoomName        sql.NullString
+	RoomDescription sql.NullString
+	RoomAvatar      sql.NullString
+	RoomIsGroup     bool
+	RoomCreatedBy   sql.NullInt64
 }
 
 func (q *Queries) CreateRoom(ctx context.Context, arg CreateRoomParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createRoom, arg.RoomName, arg.RoomIsGroup, arg.RoomCreatedBy)
+	return q.db.ExecContext(ctx, createRoom,
+		arg.RoomName,
+		arg.RoomDescription,
+		arg.RoomAvatar,
+		arg.RoomIsGroup,
+		arg.RoomCreatedBy,
+	)
+}
+
+const getGroupRoomsByUserId = `-- name: GetGroupRoomsByUserId :many
+SELECT 
+  r.room_id, 
+  r.room_name, 
+  r.room_description, 
+  r.room_avatar,
+  r.room_created_by,
+  r.room_created_at,
+  mm.member_user_id, 
+  mm.member_nickname, 
+  mm.member_role,
+  mm.member_last_seen,
+  g.message_id, 
+  g.message_content, 
+  g.message_sender_id,
+  g.message_type, 
+  g.message_sent_at
+FROM go_db_chat_rooms r
+JOIN go_db_chat_room_members m 
+  ON r.room_id = m.room_id AND m.member_user_id = ?
+LEFT JOIN (
+  SELECT gm.message_id, gm.message_room_id, gm.message_sender_id, gm.message_content, gm.message_type, gm.message_sent_at
+  FROM go_db_chat_messages_group gm
+  INNER JOIN (
+    SELECT message_room_id, MAX(message_sent_at) AS max_sent_at
+    FROM go_db_chat_messages_group
+    GROUP BY message_room_id
+  ) latest
+    ON gm.message_room_id = latest.message_room_id
+    AND gm.message_sent_at = latest.max_sent_at
+) g
+  ON g.message_room_id = r.room_id
+RIGHT jOIN go_db_chat_room_members mm 
+  ON mm.room_id = r.room_id
+WHERE r.room_is_group = 1
+`
+
+type GetGroupRoomsByUserIdRow struct {
+	RoomID          uint64
+	RoomName        sql.NullString
+	RoomDescription sql.NullString
+	RoomAvatar      sql.NullString
+	RoomCreatedBy   sql.NullInt64
+	RoomCreatedAt   sql.NullTime
+	MemberUserID    uint64
+	MemberNickname  sql.NullString
+	MemberRole      string
+	MemberLastSeen  sql.NullInt64
+	MessageID       uint64
+	MessageContent  string
+	MessageSenderID uint64
+	MessageType     NullGoDbChatMessagesGroupMessageType
+	MessageSentAt   time.Time
+}
+
+func (q *Queries) GetGroupRoomsByUserId(ctx context.Context, memberUserID uint64) ([]GetGroupRoomsByUserIdRow, error) {
+	rows, err := q.db.QueryContext(ctx, getGroupRoomsByUserId, memberUserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetGroupRoomsByUserIdRow
+	for rows.Next() {
+		var i GetGroupRoomsByUserIdRow
+		if err := rows.Scan(
+			&i.RoomID,
+			&i.RoomName,
+			&i.RoomDescription,
+			&i.RoomAvatar,
+			&i.RoomCreatedBy,
+			&i.RoomCreatedAt,
+			&i.MemberUserID,
+			&i.MemberNickname,
+			&i.MemberRole,
+			&i.MemberLastSeen,
+			&i.MessageID,
+			&i.MessageContent,
+			&i.MessageSenderID,
+			&i.MessageType,
+			&i.MessageSentAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPrivateRoomsByUserId = `-- name: GetPrivateRoomsByUserId :many
+SELECT 
+  r.room_id, 
+  
+  m.member_user_id as current_user_id,
+  m.member_last_seen as current_user_last_seen,
+
+  mm.member_user_id,
+  mm.member_last_seen,
+  g.message_id, 
+  g.message_content, 
+  g.message_receiver_id,
+  g.message_type, 
+  g.message_sent_at
+FROM go_db_chat_rooms r 
+JOIN go_db_chat_room_members m
+  ON r.room_id = m.room_id AND m.member_user_id = ? AND r.room_is_group = 0
+LEFT JOIN (
+  SELECT dm.message_id, dm.message_room_id, dm.message_receiver_id, dm.message_content, dm.message_type, dm.message_sent_at
+  FROM go_db_chat_messages_direct dm
+  INNER JOIN (
+    SELECT message_room_id, MAX(message_sent_at) AS max_sent_at
+    FROM go_db_chat_messages_direct
+    GROUP BY message_room_id
+  ) latest
+    ON dm.message_room_id = latest.message_room_id
+    AND dm.message_sent_at = latest.max_sent_at
+) g 
+  ON g.message_room_id = r.room_id
+  LEFT JOIN go_db_chat_room_members mm
+  ON mm.room_id = r.room_id AND mm.member_user_id != m.member_user_id
+`
+
+type GetPrivateRoomsByUserIdRow struct {
+	RoomID              uint64
+	CurrentUserID       uint64
+	CurrentUserLastSeen sql.NullInt64
+	MemberUserID        sql.NullInt64
+	MemberLastSeen      sql.NullInt64
+	MessageID           uint64
+	MessageContent      string
+	MessageReceiverID   uint64
+	MessageType         NullGoDbChatMessagesDirectMessageType
+	MessageSentAt       time.Time
+}
+
+func (q *Queries) GetPrivateRoomsByUserId(ctx context.Context, memberUserID uint64) ([]GetPrivateRoomsByUserIdRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPrivateRoomsByUserId, memberUserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPrivateRoomsByUserIdRow
+	for rows.Next() {
+		var i GetPrivateRoomsByUserIdRow
+		if err := rows.Scan(
+			&i.RoomID,
+			&i.CurrentUserID,
+			&i.CurrentUserLastSeen,
+			&i.MemberUserID,
+			&i.MemberLastSeen,
+			&i.MessageID,
+			&i.MessageContent,
+			&i.MessageReceiverID,
+			&i.MessageType,
+			&i.MessageSentAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getRoomById = `-- name: GetRoomById :one
-SELECT room_id, room_name, room_is_group, room_created_by, room_created_at FROM ` + "`" + `go_db_chat_rooms` + "`" + ` 
+SELECT room_id, room_name, room_description, room_avatar, room_is_group, room_created_by, room_created_at FROM ` + "`" + `go_db_chat_rooms` + "`" + ` 
 WHERE ` + "`" + `room_id` + "`" + ` = ? LIMIT 1
 `
 
@@ -35,6 +221,8 @@ func (q *Queries) GetRoomById(ctx context.Context, roomID uint64) (GoDbChatRoom,
 	err := row.Scan(
 		&i.RoomID,
 		&i.RoomName,
+		&i.RoomDescription,
+		&i.RoomAvatar,
 		&i.RoomIsGroup,
 		&i.RoomCreatedBy,
 		&i.RoomCreatedAt,
@@ -46,6 +234,7 @@ const getRoomByName = `-- name: GetRoomByName :one
 SELECT ` + "`" + `room_id` + "`" + `, ` + "`" + `room_is_group` + "`" + ` 
 FROM ` + "`" + `go_db_chat_rooms` + "`" + ` 
 WHERE ` + "`" + `room_name` + "`" + ` IN (?, ?) 
+AND ` + "`" + `room_is_group` + "`" + ` = 0
 LIMIT 1
 `
 
@@ -62,6 +251,25 @@ type GetRoomByNameRow struct {
 func (q *Queries) GetRoomByName(ctx context.Context, arg GetRoomByNameParams) (GetRoomByNameRow, error) {
 	row := q.db.QueryRowContext(ctx, getRoomByName, arg.RoomName, arg.RoomName_2)
 	var i GetRoomByNameRow
+	err := row.Scan(&i.RoomID, &i.RoomIsGroup)
+	return i, err
+}
+
+const getRoomGroupByName = `-- name: GetRoomGroupByName :one
+SELECT ` + "`" + `room_id` + "`" + `, ` + "`" + `room_is_group` + "`" + `
+FROM ` + "`" + `go_db_chat_rooms` + "`" + ` 
+WHERE ` + "`" + `room_name` + "`" + ` = ? AND ` + "`" + `room_is_group` + "`" + ` = 1
+LIMIT 1
+`
+
+type GetRoomGroupByNameRow struct {
+	RoomID      uint64
+	RoomIsGroup bool
+}
+
+func (q *Queries) GetRoomGroupByName(ctx context.Context, roomName sql.NullString) (GetRoomGroupByNameRow, error) {
+	row := q.db.QueryRowContext(ctx, getRoomGroupByName, roomName)
+	var i GetRoomGroupByNameRow
 	err := row.Scan(&i.RoomID, &i.RoomIsGroup)
 	return i, err
 }

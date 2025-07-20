@@ -13,14 +13,6 @@ CREATE TABLE `go_db_chat_messages_direct` (
 -- +goose StatementEnd
 
 -- +goose StatementBegin
-CREATE INDEX `idx_direct_receiver_id` ON `go_db_chat_messages_direct`(`message_receiver_id`);
--- +goose StatementEnd
-
--- +goose StatementBegin
-CREATE INDEX `idx_direct_room_id` ON `go_db_chat_messages_direct`(`message_room_id`);
--- +goose StatementEnd
-
--- +goose StatementBegin
 CREATE INDEX `idx_direct_sent_at` ON `go_db_chat_messages_direct`(`message_sent_at`);
 -- +goose StatementEnd
 

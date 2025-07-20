@@ -17,5 +17,4 @@ func Test(ctx *gin.Context) {
 		"data":    a,
 	})
 
-
 }

@@ -13,10 +13,6 @@ CREATE TABLE `go_db_chat_messages_group` (
 -- +goose StatementEnd
 
 -- +goose StatementBegin
-CREATE INDEX `idx_group_room_id` ON `go_db_chat_messages_group`(`message_room_id`);
--- +goose StatementEnd
-
--- +goose StatementBegin
 CREATE INDEX `idx_group_sender_id` ON `go_db_chat_messages_group`(`message_sender_id`);
 -- +goose StatementEnd
 

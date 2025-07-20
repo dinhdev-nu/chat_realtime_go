@@ -12,17 +12,17 @@ func LoadConfig() {
 	viper.SetConfigName("local")
 	viper.SetConfigType("yaml")
 
-	if err:= viper.ReadInConfig(); err != nil {
+	if err := viper.ReadInConfig(); err != nil {
 		panic("Error reading config file" + err.Error())
 	}
 
 	// chuyển dữ liệu từ file local.yaml vào biến gobal.Config
-	if err:= viper.Unmarshal(&global.Config); err != nil {
+	if err := viper.Unmarshal(&global.Config); err != nil {
 		panic("Error unmarshal config" + err.Error())
 	}
 }
 
-// get env 
+// get env
 // func loadEnv() {
 // 	err:= dotenv.Load() // go get github.com/joho/godotenv
 // 	if err!= nil {

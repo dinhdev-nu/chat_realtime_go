@@ -11,6 +11,7 @@ import (
 
 type IUserRepo interface {
 	GetUserInfoByName(username string) (*model.GoDbUserInfo, error)
+	GetUserInfoByIDs(userIDs []uint64) ([]*model.GoDbUserInfo, error)
 	SearchUserByName(username string, userIdRes int64) ([]*dto.SearchUsersOutput, error)
 
 	GetStatusByUserId(userId int64) (string, error)
@@ -19,6 +20,21 @@ type UserRepo struct{}
 
 func NewUserRepo() IUserRepo {
 	return &UserRepo{}
+}
+
+func (ur *UserRepo) GetUserInfoByIDs(userIDs []uint64) ([]*model.GoDbUserInfo, error) {
+	var users []*model.GoDbUserInfo
+	result := global.Mdb.Model(&model.GoDbUserInfo{}).
+		Select("user_id, user_nickname, user_avatar").
+		Where("user_id IN ?", userIDs).
+		Find(&users)
+	if result.Error != nil {
+		if result.Error.Error() == "record not found" {
+			return nil, nil // nếu không tìm thấy thì trả về nil
+		}
+		return nil, result.Error // nếu có lỗi khác thì trả về lỗi
+	}
+	return users, nil // nếu tìm thấy thì trả về danh sách người dùng
 }
 
 func (ur *UserRepo) GetStatusByUserId(userId int64) (string, error) {

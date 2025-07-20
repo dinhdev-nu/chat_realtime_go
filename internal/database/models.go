@@ -97,18 +97,6 @@ func (ns NullGoDbChatMessagesGroupMessageType) Value() (driver.Value, error) {
 	return string(ns.GoDbChatMessagesGroupMessageType), nil
 }
 
-// Read status for direct messages
-type GoDbChatMessageStatus struct {
-	// Message ID (from direct)
-	MessageID uint64
-	// User ID - usually receiver
-	MessageUserID uint64
-	// Read status
-	MessageIsRead sql.NullBool
-	// Read timestamp
-	MessageReadAt sql.NullTime
-}
-
 // 1-1 direct messages
 type GoDbChatMessagesDirect struct {
 	MessageID uint64
@@ -141,6 +129,10 @@ type GoDbChatRoom struct {
 	RoomID uint64
 	// Room name (null nếu 1-1)
 	RoomName sql.NullString
+	// Room description
+	RoomDescription sql.NullString
+	// Room avatar URL
+	RoomAvatar sql.NullString
 	// Is group chat?
 	RoomIsGroup bool
 	// Created by user ID
@@ -155,6 +147,12 @@ type GoDbChatRoomMember struct {
 	RoomID uint64
 	// User ID
 	MemberUserID uint64
+	// Nickname in the room
+	MemberNickname sql.NullString
 	// Joined at
 	MemberJoinedAt sql.NullTime
+	// Role in the room
+	MemberRole string
+	// Message ID last Seen
+	MemberLastSeen sql.NullInt64
 }

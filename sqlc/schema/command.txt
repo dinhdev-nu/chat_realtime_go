@@ -1,3 +1,6 @@
 goose -dir sqlc/schema create go_db_chat_room_members sql
 
-cd ./sqlc/schema & goose mysql "usname:password@tcp(host:port)/dbname up
+
+url = "usname:password@tcp(host:port)/dbname?parseTime=true"
+
+cd ./sqlc/schema & goose mysql "root:123456@tcp(localhost:3306)/chatapp?parseTime=true" up

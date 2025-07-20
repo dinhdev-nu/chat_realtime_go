@@ -11,48 +11,16 @@ import (
 	"time"
 )
 
-const getLastMessagesByRoomId = `-- name: GetLastMessagesByRoomId :many
-SELECT d.message_id FROM go_db_chat_messages_direct d 
-JOIN go_db_chat_message_status s ON d.message_id = s.message_id
-WHERE d.message_room_id = ?
-`
-
-func (q *Queries) GetLastMessagesByRoomId(ctx context.Context, messageRoomID uint64) ([]uint64, error) {
-	rows, err := q.db.QueryContext(ctx, getLastMessagesByRoomId, messageRoomID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []uint64
-	for rows.Next() {
-		var message_id uint64
-		if err := rows.Scan(&message_id); err != nil {
-			return nil, err
-		}
-		items = append(items, message_id)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getMessagesDirectByRoomId = `-- name: GetMessagesDirectByRoomId :many
-SELECT d.message_id, 
-       d.message_room_id, 
-       d.message_receiver_id, 
-       d.message_content, 
-       d.message_type,
-       d.message_sent_at,
-       s.message_is_read,
-       s.message_read_at
-FROM go_db_chat_messages_direct d 
-JOIN go_db_chat_message_status s ON d.message_id = s.message_id
-WHERE d.message_room_id = ?
-ORDER BY d.message_sent_at DESC
+SELECT message_id, 
+       message_room_id, 
+       message_receiver_id, 
+       message_content, 
+       message_type,
+       message_sent_at
+FROM go_db_chat_messages_direct
+WHERE message_room_id = ?
+ORDER BY message_sent_at DESC
 LIMIT ? OFFSET ?
 `
 
@@ -62,26 +30,15 @@ type GetMessagesDirectByRoomIdParams struct {
 	Offset        int32
 }
 
-type GetMessagesDirectByRoomIdRow struct {
-	MessageID         uint64
-	MessageRoomID     uint64
-	MessageReceiverID uint64
-	MessageContent    string
-	MessageType       NullGoDbChatMessagesDirectMessageType
-	MessageSentAt     time.Time
-	MessageIsRead     sql.NullBool
-	MessageReadAt     sql.NullTime
-}
-
-func (q *Queries) GetMessagesDirectByRoomId(ctx context.Context, arg GetMessagesDirectByRoomIdParams) ([]GetMessagesDirectByRoomIdRow, error) {
+func (q *Queries) GetMessagesDirectByRoomId(ctx context.Context, arg GetMessagesDirectByRoomIdParams) ([]GoDbChatMessagesDirect, error) {
 	rows, err := q.db.QueryContext(ctx, getMessagesDirectByRoomId, arg.MessageRoomID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetMessagesDirectByRoomIdRow
+	var items []GoDbChatMessagesDirect
 	for rows.Next() {
-		var i GetMessagesDirectByRoomIdRow
+		var i GoDbChatMessagesDirect
 		if err := rows.Scan(
 			&i.MessageID,
 			&i.MessageRoomID,
@@ -89,8 +46,6 @@ func (q *Queries) GetMessagesDirectByRoomId(ctx context.Context, arg GetMessages
 			&i.MessageContent,
 			&i.MessageType,
 			&i.MessageSentAt,
-			&i.MessageIsRead,
-			&i.MessageReadAt,
 		); err != nil {
 			return nil, err
 		}

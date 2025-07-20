@@ -36,9 +36,9 @@ func (cr *ChatRouter) InitRoutes(router *gin.RouterGroup) {
 		chatRouter.GET("/get-messages/:room-id", cr.cc.GetMessages) // ChatController.GetMessages)
 
 		// room
-		chatRouter.GET("/get-room/:room_id", cr.cc.GetRoomChatById) // ChatController.GetRoomChatById)
+		chatRouter.GET("/get-rooms", cr.cc.GetRooms) // Get room private, group by user id
+		chatRouter.GET("/get-room-detail/:room_id", nil)
 		chatRouter.POST("/create-room", cr.cc.CreateNewRoom)
-
 		// status
 		chatRouter.POST("/set-status", cr.cc.UpdateStatusMessages) // ChatController.UpdateStatus
 	}
