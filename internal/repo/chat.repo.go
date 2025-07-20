@@ -11,17 +11,18 @@ import (
 
 type IChatRepo interface {
 	GetRoomsByUserId(userId int64) ([]database.GetPrivateRoomsByUserIdRow, error)
+	GetGroupRoomsByUserId(userId int64) ([]database.GetGroupRoomsByUserIdRow, error)
 	GetRoomById(id uint64) (database.GoDbChatRoom, error)
 	GetRoomByName(name string) (database.GetRoomByNameRow, error)
+	GetRoomGroupByName(name string) (database.GetRoomGroupByNameRow, error)
 	CreateRoom(data *dto.CreateRoomDTO) error
-	AddMembersToRoom(roomId uint64, users []uint64) error
-	GetAnotherUserID(roomId uint64, userId int64) (int64, error)
+	AddMembersToRoom(roomId uint64, userCreateBy uint64, users []uint64) error
+	GetAnotherUserID(roomId uint64, userId int64) (database.GetAnotherPrivateMenberByRoomIdRow, error)
 
-	GetMessagesFromRoom(roomId uint64, page int64) ([]database.GetMessagesDirectByRoomIdRow, error)
-	GetMessagesGruopFromRoom(roomId uint64, page int64) ([]database.GoDbChatMessagesGroup, error)
+	GetMessagesFromRoom(roomId uint64, page int64, offset int64) ([]database.GoDbChatMessagesDirect, error)
+	GetMessagesGruopFromRoom(roomId uint64, page int64, offset int64) ([]database.GetMessagesGroupByRoomIdRow, error)
 	SaveMessegeDirect(data dto.SaveMessageDTO) (int64, error)
 	SaveMessegeGroup(data dto.SaveMessageDTO) (int64, error)
-	SaveMessageStatus(msgId uint64, userId int64) error
 
 	UpdateMessageStatus(data *dto.UpdateStatusInput) error
 }
@@ -40,20 +41,10 @@ func NewChatRepo() IChatRepo {
 }
 
 func (r *chatRepo) UpdateMessageStatus(data *dto.UpdateStatusInput) error {
-	err := r.sqlc.UpdateMessageStatus(r.ctx, database.UpdateMessageStatusParams{
-		RoomID:            data.RoomID,
-		MessageReceiverID: data.UserId,
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (r *chatRepo) SaveMessageStatus(msgId uint64, userId int64) error {
-	err := r.sqlc.SaveMessageStatus(r.ctx, database.SaveMessageStatusParams{
-		MessageID:     msgId,
-		MessageUserID: uint64(userId),
+	err := r.sqlc.UpdateMemberLastSeen(r.ctx, database.UpdateMemberLastSeenParams{
+		RoomID:         data.RoomID,
+		MemberUserID:   data.UserId,
+		MemberLastSeen: NullInt64(data.LastMessage),
 	})
 	if err != nil {
 		return err
@@ -99,25 +90,26 @@ func (r *chatRepo) SaveMessegeGroup(data dto.SaveMessageDTO) (int64, error) {
 	return id, nil
 }
 
-func (r *chatRepo) GetMessagesGruopFromRoom(roomId uint64, page int64) ([]database.GoDbChatMessagesGroup, error) {
-	limit := 10
+func (r *chatRepo) GetMessagesGruopFromRoom(roomId uint64, page int64, offset int64) ([]database.GetMessagesGroupByRoomIdRow, error) {
+	limit := 20
 	messages, err := r.sqlc.GetMessagesGroupByRoomId(r.ctx, database.GetMessagesGroupByRoomIdParams{
 		MessageRoomID: roomId,
 		Limit:         int32(limit),
-		Offset:        int32((page - 1) * int64(limit)),
+		Offset:        int32((page-1)*int64(limit)) + int32(offset),
 	})
 	if err != nil {
+		fmt.Println("Error fetching group messages:", err)
 		return nil, err
 	}
 	return messages, nil
 }
 
-func (r *chatRepo) GetMessagesFromRoom(roomId uint64, page int64) ([]database.GetMessagesDirectByRoomIdRow, error) {
-	limit := 10
+func (r *chatRepo) GetMessagesFromRoom(roomId uint64, page int64, offset int64) ([]database.GoDbChatMessagesDirect, error) {
+	limit := 20
 	messages, err := r.sqlc.GetMessagesDirectByRoomId(r.ctx, database.GetMessagesDirectByRoomIdParams{
 		MessageRoomID: roomId,
 		Limit:         int32(limit),
-		Offset:        int32((page - 1) * int64(limit)),
+		Offset:        int32((page-1)*int64(limit)) + int32(offset),
 	})
 	if err != nil {
 		fmt.Println("Error fetching messages:", err)
@@ -126,15 +118,15 @@ func (r *chatRepo) GetMessagesFromRoom(roomId uint64, page int64) ([]database.Ge
 	return messages, nil
 }
 
-func (r *chatRepo) GetAnotherUserID(roomId uint64, userId int64) (int64, error) {
+func (r *chatRepo) GetAnotherUserID(roomId uint64, userId int64) (database.GetAnotherPrivateMenberByRoomIdRow, error) {
 	anotherUser, err := r.sqlc.GetAnotherPrivateMenberByRoomId(r.ctx, database.GetAnotherPrivateMenberByRoomIdParams{
 		RoomID:       roomId,
 		MemberUserID: uint64(userId),
 	})
 	if err != nil {
-		return 0, err
+		return database.GetAnotherPrivateMenberByRoomIdRow{}, err
 	}
-	return int64(anotherUser), nil
+	return anotherUser, nil
 }
 
 func (r *chatRepo) GetRoomsByUserId(userId int64) ([]database.GetPrivateRoomsByUserIdRow, error) {
@@ -165,11 +157,21 @@ func (r *chatRepo) GetRoomByName(name string) (database.GetRoomByNameRow, error)
 	return room, nil
 }
 
+func (r *chatRepo) GetRoomGroupByName(name string) (database.GetRoomGroupByNameRow, error) {
+	room, err := r.sqlc.GetRoomGroupByName(r.ctx, NullString(name))
+	if err != nil {
+		return database.GetRoomGroupByNameRow{}, err
+	}
+	return room, nil
+}
+
 func (r *chatRepo) CreateRoom(data *dto.CreateRoomDTO) error {
 	res, err := r.sqlc.CreateRoom(r.ctx, database.CreateRoomParams{
-		RoomName:      NullString(data.RoomName),
-		RoomCreatedBy: NullInt64(data.RoomCreateBy),
-		RoomIsGroup:   data.RoomIsGroup,
+		RoomName:        NullString(data.RoomName),
+		RoomDescription: NullString(data.RoomDescription),
+		RoomAvatar:      NullString(data.RoomAvatar),
+		RoomCreatedBy:   NullInt64(data.RoomCreateBy),
+		RoomIsGroup:     data.RoomIsGroup,
 	})
 	if err != nil {
 		fmt.Println("Error creating room:", err)
@@ -180,15 +182,28 @@ func (r *chatRepo) CreateRoom(data *dto.CreateRoomDTO) error {
 	return nil
 }
 
-func (r *chatRepo) AddMembersToRoom(roomId uint64, users []uint64) error {
+func (r *chatRepo) AddMembersToRoom(roomId uint64, userCreateBy uint64, users []uint64) error {
 	for _, user := range users {
+		role := "member"
+		if userCreateBy == user {
+			role = "admin"
+		}
 		err := r.sqlc.InsetMemberToRoom(r.ctx, database.InsetMemberToRoomParams{
 			RoomID:       roomId,
 			MemberUserID: user,
+			MemberRole:   role,
 		})
 		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func (r *chatRepo) GetGroupRoomsByUserId(userId int64) ([]database.GetGroupRoomsByUserIdRow, error) {
+	rooms, err := r.sqlc.GetGroupRoomsByUserId(r.ctx, uint64(userId))
+	if err != nil {
+		return nil, err
+	}
+	return rooms, nil
 }

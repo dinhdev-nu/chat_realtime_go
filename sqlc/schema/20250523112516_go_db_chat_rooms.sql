@@ -3,6 +3,8 @@
 CREATE TABLE `go_db_chat_rooms` (
   `room_id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT 'Room ID',
   `room_name` VARCHAR(100) DEFAULT NULL COMMENT 'Room name (null nếu 1-1)',
+  `room_description` TEXT DEFAULT NULL COMMENT 'Room description',
+  `room_avatar` VARCHAR(255) DEFAULT NULL COMMENT 'Room avatar URL',
   `room_is_group` BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Is group chat?',
   `room_created_by` BIGINT UNSIGNED DEFAULT NULL COMMENT 'Created by user ID',
   `room_created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created at',
@@ -10,6 +12,10 @@ CREATE TABLE `go_db_chat_rooms` (
   FOREIGN KEY (`room_created_by`) REFERENCES `go_db_user_info`(`user_id`)
     ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Chat rooms';
+-- +goose StatementEnd
+
+-- +goose StatementBegin
+CREATE UNIQUE INDEX `idx_room_name` ON `go_db_chat_rooms` (`room_name`)
 -- +goose StatementEnd
 
 -- +goose Down

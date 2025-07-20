@@ -27,22 +27,26 @@ type InfoUserPrivateChat struct {
 }
 
 type GetMessagesFromRoomOutput struct {
-	RoomIsGroup    bool                                    `json:"room_is_group"`   // Kiểm tra phòng chat là nhóm hay không
-	MessagesDriect []database.GetMessagesDirectByRoomIdRow `json:"messages_direct"` // Tin nhắn trong phòng chat
-	MessagesGroup  []database.GoDbChatMessagesGroup        `json:"messages_group"`
+	RoomIsGroup    bool                                   `json:"room_is_group"`   // Kiểm tra phòng chat là nhóm hay không
+	MessagesDriect []database.GoDbChatMessagesDirect      `json:"messages_direct"` // Tin nhắn trong phòng chat
+	MessagesGroup  []database.GetMessagesGroupByRoomIdRow `json:"messages_group"`
 }
 
 type CreateRoomDTO struct {
-	RoomID       uint64   `json:"room_id"` // Tên phòng chat
-	RoomName     string   `json:"room_name" binding:"required"`
-	RoomCreateBy int64    `json:"room_create_by" binding:"required"`
-	RoomIsGroup  bool     `json:"room_is_group"`
-	RoomMembers  []uint64 `json:"room_members" binding:"required"`
+	RoomID          uint64   `json:"room_id"` // Tên phòng chat
+	RoomName        string   `json:"room_name" binding:"required"`
+	RoomAvatar      string   `json:"room_avatar"`      // Avatar của phòng chat
+	RoomDescription string   `json:"room_description"` // Mô tả của phòng chat
+	RoomCreateBy    int64    `json:"room_create_by" binding:"required"`
+	RoomIsGroup     bool     `json:"room_is_group"`
+	RoomMessageID   int64    `json:"room_message_id"` // ID của tin nhắn đầu tiên trong phòng chat
+	RoomMembers     []uint64 `json:"room_members" binding:"required"`
 }
 
 type UpdateStatusInput struct {
-	RoomID uint64 `json:"room_id" binding:"required"` // ID của phòng chat
-	UserId uint64 `json:"user_id" binding:"required"` // ID của người dùng
+	RoomID      uint64 `json:"room_id" binding:"required"` // ID của phòng chat
+	UserId      uint64 `json:"user_id" binding:"required"` // ID của người dùng
+	LastMessage int64  `json:"last_message"`               // ID của tin nhắn cuối cùng đã đọc
 }
 
 type SaveMessageDTO struct {
@@ -51,6 +55,7 @@ type SaveMessageDTO struct {
 	MessageSenderID   uint64    `json:"message_sender_id"`   // ID của người gửi
 	MessageReceiverID uint64    `json:"message_receiver_id"` // ID của người nhận (nếu có)
 	MessageContent    string    `json:"message_content"`     // Nội dung tin nhắn
+	MessageType       string    `json:"message_type"`        // Loại tin nhắn (text, image, video, file, etc.)
 	MessageSentAt     time.Time `json:"message_sent_at"`     // Thời gian gửi tin nhắn
 }
 
@@ -89,4 +94,60 @@ type OnMessage struct {
 	Status      StatusMessage `json:"status,omitempty"`       // Tin nhắn trạng thái
 	Typing      Typing        `json:"typing,omitempty"`       // Tin nhắn đang gõ
 	Read        Read          `json:"read,omitempty"`         // Tin nhắn đã đọc
+	Room        any           `json:"room,omitempty"`         // ID của phòng chat (nếu có)
+}
+
+type GroupMember struct {
+	UserID         int64  `json:"id"`        // ID của người dùng
+	UserName       string `json:"name"`      // Tên của người dùng
+	UserAvatar     string `json:"avata"`     // Avatar của người dùng
+	UserStatus     string `json:"status"`    // Trạng thái của người dùng (online, offline, etc.)
+	UserNickname   string `json:"nickname"`  // Biệt danh của người dùng trong nhóm
+	Role           string `json:"role"`      // Vai trò của người dùng trong nhóm (admin, member, etc.)
+	MemberLastSeen int64  `json:"last_seen"` // Thời gian người dùng đã xem tin nhắn cuối cùng
+}
+
+type GroupMessage struct {
+	MessageID       uint64                                        `json:"message_id"`        // ID của tin nhắn
+	MessageContent  string                                        `json:"message_content"`   // Nội dung tin nhắn
+	MessageSenderID uint64                                        `json:"message_sender_id"` // ID của người gửi
+	MessageType     database.NullGoDbChatMessagesGroupMessageType `json:"message_type"`      // Loại tin nhắn (text, image, video, file, etc.)
+	MessageSentAt   time.Time                                     `json:"message_sent_at"`   // Thời gian gửi
+}
+
+type GetGroupRoomResponse struct {
+	RoomID          uint64        `json:"room_id"`           // ID của phòng chat
+	RoomName        string        `json:"room_name"`         // Tên của phòng chat
+	RoomAvatar      string        `json:"room_avatar"`       // Avatar của phòng chat
+	RoomDescription string        `json:"room_description"`  // Mô tả của phòng chat
+	RoomCreatedBy   int64         `json:"room_created_by"`   // ID của người tạo phòng chat
+	RoomCreatedAt   time.Time     `json:"room_created_at"`   // Thời gian tạo phòng chat
+	RoomIsGroup     bool          `json:"room_is_group"`     // Kiểm tra phòng chat là nhóm hay không
+	RoomMembers     []GroupMember `json:"room_members"`      // Danh sách thành viên trong phòng chat
+	RoomLastMessage GroupMessage  `json:"room_last_message"` // Tin nhắn cuối cùng trong phòng chat
+	CurrentLastSeen int64         `json:"current_last_seen"` // Thời gian người dùng đã xem tin nhắn cuối cùng
+}
+
+type Conversation struct {
+	RoomID          uint64 `json:"id"`          // ID của phòng chat
+	RoomName        string `json:"name"`        // Tên của phòng chat
+	RoomAvatar      string `json:"avatar"`      // Avatar của phòng chat
+	RoomLastMessage string `json:"lastMessage"` // Tin nhắn cuối cùng trong phòng chat
+	RoomUnreadCount int    `json:"unreadCount"` // Số lượng tin nhắn chưa đọc trong phòng chat
+	RoomIsTemporary bool   `json:"isTemporary"` // Kiểm tra phòng chat tạm thời hay không
+}
+
+type PrivateConversation struct {
+	Conversation
+	User InfoUserPrivateChat `json:"user"` // Thông tin người dùng trong cuộc trò chuyện
+	Type string              `json:"type"` // Loại cuộc trò chuyện (private, group, etc.)
+}
+
+type GroupConversation struct {
+	Conversation
+	RoomParticipants []GroupMember `json:"participants"` // Danh sách thành viên trong cuộc trò chuyện nhóm
+	RoomType         string        `json:"type"`         // Loại phòng chat (group, broadcast, etc.)
+	RoomDescription  string        `json:"description"`  // Mô tả của phòng chat
+	RoomCreatedBy    GroupMember   `json:"createdBy"`    // ID của người tạo phòng chat
+	RoomCreatedAt    time.Time     `json:"createdAt"`    // Thời gian tạo phòng chat
 }

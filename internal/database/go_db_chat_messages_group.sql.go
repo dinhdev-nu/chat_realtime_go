@@ -12,9 +12,15 @@ import (
 )
 
 const getMessagesGroupByRoomId = `-- name: GetMessagesGroupByRoomId :many
-SELECT message_id, message_room_id, message_sender_id, message_content, message_type, message_sent_at FROM go_db_chat_messages_group   
+SELECT message_id,
+       message_room_id,
+       message_sender_id,
+       message_type,
+       message_content,
+       message_sent_at
+FROM go_db_chat_messages_group
 WHERE message_room_id = ?
-ORDER BY message_send_at DESC
+ORDER BY message_sent_at DESC
 LIMIT ? OFFSET ?
 `
 
@@ -24,21 +30,30 @@ type GetMessagesGroupByRoomIdParams struct {
 	Offset        int32
 }
 
-func (q *Queries) GetMessagesGroupByRoomId(ctx context.Context, arg GetMessagesGroupByRoomIdParams) ([]GoDbChatMessagesGroup, error) {
+type GetMessagesGroupByRoomIdRow struct {
+	MessageID       uint64
+	MessageRoomID   uint64
+	MessageSenderID uint64
+	MessageType     NullGoDbChatMessagesGroupMessageType
+	MessageContent  string
+	MessageSentAt   time.Time
+}
+
+func (q *Queries) GetMessagesGroupByRoomId(ctx context.Context, arg GetMessagesGroupByRoomIdParams) ([]GetMessagesGroupByRoomIdRow, error) {
 	rows, err := q.db.QueryContext(ctx, getMessagesGroupByRoomId, arg.MessageRoomID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GoDbChatMessagesGroup
+	var items []GetMessagesGroupByRoomIdRow
 	for rows.Next() {
-		var i GoDbChatMessagesGroup
+		var i GetMessagesGroupByRoomIdRow
 		if err := rows.Scan(
 			&i.MessageID,
 			&i.MessageRoomID,
 			&i.MessageSenderID,
-			&i.MessageContent,
 			&i.MessageType,
+			&i.MessageContent,
 			&i.MessageSentAt,
 		); err != nil {
 			return nil, err

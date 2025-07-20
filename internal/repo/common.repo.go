@@ -3,6 +3,7 @@ package repo
 import (
 	"database/sql"
 	"strings"
+	"time"
 	"unicode"
 )
 
@@ -44,6 +45,21 @@ func NullInt64(i int64) sql.NullInt64 {
 		Valid: i != 0,
 	}
 }
+
+func NullUint64(i uint64) sql.NullInt64 {
+	return sql.NullInt64{
+		Int64: int64(i),
+		Valid: i != 0,
+	}
+}
+
+func NullTime(t time.Time) sql.NullTime {
+	return sql.NullTime{
+		Time:  t,
+		Valid: !t.IsZero(),
+	}
+}
+
 func NullBool(b bool) bool {
 	return b
 }

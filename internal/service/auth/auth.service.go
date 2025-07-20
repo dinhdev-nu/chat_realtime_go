@@ -243,6 +243,7 @@ func (as *authService) Login(email string, password string, loginIp string) (dto
 		fmt.Println("error marshal user info" + err.Error())
 		return dto.LoginOutput{}, response.ErrorUserNotExist
 	}
+
 	// save token to redis
 	err = as.repo.AddUserKey(uuidToken, userData)
 

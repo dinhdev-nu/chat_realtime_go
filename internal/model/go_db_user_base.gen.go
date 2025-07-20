@@ -12,15 +12,15 @@ const TableNameGoDbUserBase = "go_db_user_base"
 
 // GoDbUserBase go_db_user_base
 type GoDbUserBase struct {
-	UserID         int64     `gorm:"column:user_id;primaryKey;comment:User ID" json:"user_id"`                                             // User ID
-	UserAccount    string    `gorm:"column:user_account;not null;comment:User account" json:"user_account"`                                // User account
-	UserPassword   string    `gorm:"column:user_password;not null;comment:Hashed user password" json:"user_password"`                      // Hashed user password
-	UserSalt       string    `gorm:"column:user_salt;not null;comment:Password salt" json:"user_salt"`                                     // Password salt
+	UserID         int64      `gorm:"column:user_id;primaryKey;comment:User ID" json:"user_id"`                                             // User ID
+	UserAccount    string     `gorm:"column:user_account;not null;comment:User account" json:"user_account"`                                // User account
+	UserPassword   string     `gorm:"column:user_password;not null;comment:Hashed user password" json:"user_password"`                      // Hashed user password
+	UserSalt       string     `gorm:"column:user_salt;not null;comment:Password salt" json:"user_salt"`                                     // Password salt
 	UserLoginTime  *time.Time `gorm:"column:user_login_time;comment:Last login time" json:"user_login_time"`                                // Last login time
 	UserLogoutTime *time.Time `gorm:"column:user_logout_time;comment:Last logout time" json:"user_logout_time"`                             // Last logout time
-	UserLoginIP    string    `gorm:"column:user_login_ip;comment:IP address of last login" json:"user_login_ip"`                           // IP address of last login
-	UserCreatedAt  time.Time `gorm:"column:user_created_at;default:CURRENT_TIMESTAMP;comment:Record creation time" json:"user_created_at"` // Record creation time
-	UserUpdatedAt  time.Time `gorm:"column:user_updated_at;default:CURRENT_TIMESTAMP;comment:Record update time" json:"user_updated_at"`   // Record update time
+	UserLoginIP    string     `gorm:"column:user_login_ip;comment:IP address of last login" json:"user_login_ip"`                           // IP address of last login
+	UserCreatedAt  time.Time  `gorm:"column:user_created_at;default:CURRENT_TIMESTAMP;comment:Record creation time" json:"user_created_at"` // Record creation time
+	UserUpdatedAt  time.Time  `gorm:"column:user_updated_at;default:CURRENT_TIMESTAMP;comment:Record update time" json:"user_updated_at"`   // Record update time
 }
 
 // TableName GoDbUserBase's table name

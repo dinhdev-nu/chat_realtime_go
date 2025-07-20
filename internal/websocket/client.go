@@ -64,6 +64,10 @@ func (c *Client) ReadMessage() {
 			fmt.Println("User is typing...") // In ra thông báo người dùng đang gõ
 		case "read":
 			fmt.Println("User has read the message") // In ra thông báo người dùng đã đọc tin nhắn
+		case "room_created":
+			fmt.Println("Room created successfully") // In ra thông báo phòng chat đã được tạo thành công
+		default:
+			continue
 		}
 
 		c.Hub.Broadcast <- message
