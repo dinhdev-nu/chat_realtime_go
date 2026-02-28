@@ -1,2 +1,5 @@
-environment
+local.yaml
 .env
+
+go.mod
+go.sum

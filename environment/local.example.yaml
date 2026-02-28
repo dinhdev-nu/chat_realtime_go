@@ -1,0 +1,38 @@
+server:
+  port: 3010
+  host: localhost
+  mode: dev # dev, staging, production
+
+mysql:
+  host: localhost
+  port: 3306
+  username: root
+  password: your_database_password_here # Đã ẩn
+  dbname: chatapp
+  maxIdleConns: 10
+  maxOpenConns: 10
+  maxLifetime: 3600
+
+redis:
+  host: localhost
+  port: 6379
+  password: your_redis_password_here
+  database: 0
+
+log:
+  level: debug
+  file: ./log/log.001.log
+  maxsize: 10
+  maxbackups: 10
+  maxage: 28
+  compress: true
+
+jwt:
+  JwtExpireTime: 1 # hours
+  JwtSecret: your_jwt_secret_key_here # Cần thay đổi khi deploy thực tế
+
+mail:
+  host: smtp.gmail.com
+  port: 587
+  from: your_email@gmail.com
+  password: your_app_password_here # Tuyệt đối không để App Password thật ở đây
